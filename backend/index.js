@@ -17,9 +17,7 @@ const revenueRoutes = require("./routes/revenue2");
 
 const app = express();
 
-app.use(cors({
-origin:"https://fitpreneurs.onrender.com"
-}));
+app.use(cors());
 app.use(express.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
