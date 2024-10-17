@@ -205,7 +205,7 @@ const AddCustomer = () => {
                 required
               >
                 <option value="">Select Plan</option>
-                <option value="per day">Per Day</option>
+                <option value="Per Day">Per Day</option>
                 <option value="1 month">1 Month</option>
                 <option value="3 months">3 Months</option>
                 <option value="6 months">6 Months</option>

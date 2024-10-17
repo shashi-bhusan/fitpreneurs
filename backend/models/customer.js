@@ -79,6 +79,7 @@ const customerSchema = new mongoose.Schema(
       required: true,
       default: function () {
         const planDurations = {
+          "Per Day": 0,
           "1 month": 1,
           "3 months": 3,
           "6 months": 6,
