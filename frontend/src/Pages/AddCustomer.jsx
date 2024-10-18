@@ -12,6 +12,7 @@ const AddCustomer = () => {
     fullname: "",
     emailId: "",
     mobileNumber: "",
+    dateOfBirth: "", // Updated field name to match the backend
     address: "",
     plan: "",
     planCost: 0,
@@ -21,7 +22,7 @@ const AddCustomer = () => {
     totalAmount: 0,
     amountPaid: 0,
     debt: 0,
-    paymentMode: "cash", // Added new state for payment mode
+    paymentMode: "cash",
   });
 
   const [selectedEmployees, setSelectedEmployees] = useState([]);
@@ -32,7 +33,7 @@ const AddCustomer = () => {
     const fetchEmployees = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8000/api/employee?all=true"
+          "https://server.fitpreneursapiens.com/api/employee?all=true"
         );
         setEmployees(response.data.employees.reverse());
       } catch (error) {
@@ -102,6 +103,7 @@ const AddCustomer = () => {
       fullname: formData.fullname,
       emailId: formData.emailId,
       mobileNumber: formData.mobileNumber,
+      dateOfBirth: formData.dateOfBirth, // Send date of birth data
       address: formData.address,
       plan: formData.plan,
       planCost: formData.planCost,
@@ -119,7 +121,7 @@ const AddCustomer = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/customer",
+        "https://server.fitpreneursapiens.com/api/customer",
         dataToSend,
         {
           headers: { "Content-Type": "application/json" },
@@ -183,16 +185,33 @@ const AddCustomer = () => {
             </div>
           </div>
 
-          <Form.Group className="mb-3" controlId="formBasicAddress">
-            <Form.Label>Address</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="123 Main St, Anytown, USA"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-            />
-          </Form.Group>
+          <div className="w-full flex justify-around space-x-8">
+            <div className="w-1/2">
+              <Form.Group className="mb-3" controlId="formBasicDOB">
+                <Form.Label>Date of Birth</Form.Label>
+                <Form.Control
+                  type="date"
+                  name="dateOfBirth"
+                  value={formData.dob}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="w-1/2">
+              <Form.Group className="mb-3" controlId="formBasicAddress">
+                <Form.Label>Address</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="123 Main St, Anytown, USA"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <Form.Group controlId="formBasicPlan" className="w-full">
@@ -269,38 +288,17 @@ const AddCustomer = () => {
                   disabled={!formData.sessionType}
                 />
               </Form.Group>
-
-              <Form.Group
-                controlId="formBasicAssignedEmployees"
-                className="w-full"
-              >
-                <Form.Label>Assigned Personal Trainer(s)</Form.Label>
-                <Select
-                  isMulti
-                  name="assignedEmployees"
-                  options={employees.map((employee) => ({
-                    value: employee._id,
-                    label: `${employee.fullname} (${employee.mobileNumber})`,
-                  }))}
-                  value={selectedEmployees}
-                  onChange={setSelectedEmployees}
-                  className="basic-multi-select text-black"
-                  classNamePrefix="select"
-                  isDisabled={!formData.sessionType}
-                />
-              </Form.Group>
             </div>
           )}
 
-<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
             <Form.Group controlId="formBasicTotalAmount" className="w-full">
               <Form.Label>Total Amount</Form.Label>
               <Form.Control
                 type="number"
                 name="totalAmount"
                 value={formData.totalAmount}
-                onChange={handleChange}
-                disabled
+                readOnly
               />
             </Form.Group>
 
@@ -326,24 +324,38 @@ const AddCustomer = () => {
                 <option value="online">Online</option>
               </Form.Control>
             </Form.Group>
-
-            <Form.Group controlId="formBasicDebt" className="w-full">
-              <Form.Label>Debt</Form.Label>
-              <Form.Control
-                type="number"
-                name="debt"
-                value={formData.debt}
-                onChange={handleChange}
-                disabled
-              />
-            </Form.Group>
           </div>
 
-          <div className="flex justify-center items- w-full mt-5">
-            <Button variant="primary" type="submit" className="w-1/2 lg:w-1/4">
-              Submit
-            </Button>
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+  <Form.Group controlId="formBasicDebt" className="w-full">
+    <Form.Label>Debt</Form.Label>
+    <Form.Control
+      type="number"
+      name="debt"
+      value={formData.debt}
+      readOnly
+    />
+  </Form.Group>
+
+  <div className="w-full">
+    <label className="block mb-1">Assigned Employees</label>
+    <Select
+      isMulti
+      options={employees.map((emp) => ({
+        value: emp._id,
+        label: emp.fullname,
+      }))}
+      onChange={setSelectedEmployees}
+      value={selectedEmployees}
+      className="text-black"
+    />
+  </div>
+</div>
+
+
+          <Button variant="primary" type="submit">
+            Add Customer
+          </Button>
         </Form>
       </div>
     </div>

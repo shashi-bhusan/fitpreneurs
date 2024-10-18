@@ -29,11 +29,11 @@ const Mapping = () => {
   ];
 
   useEffect(() => {
-    axios.get("http://localhost:8000/api/employee?all=true")
+    axios.get("https://server.fitpreneursapiens.com/api/employee?all=true")
       .then((response) => setEmployees(response.data.employees.reverse()))
       .catch((error) => console.error(error));
 
-    axios.get("http://localhost:8000/api/customer?all=true")
+    axios.get("https://server.fitpreneursapiens.com/api/customer?all=true")
       .then((response) => setCustomers(response.data.customers))
       .catch((error) => console.error(error));
   }, []);
@@ -45,7 +45,7 @@ const Mapping = () => {
       return;
     }
 
-    axios.post("http://localhost:8000/api/employee/assign", {
+    axios.post("https://server.fitpreneursapiens.com/api/employee/assign", {
       customerId: selectedCustomer.value,
       employeeId: selectedEmployee.value,
       sessionType,

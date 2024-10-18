@@ -2,6 +2,7 @@ const Customer = require("../models/customer");
 const Employee = require("../models/employee");
 const moment = require('moment');
 
+
 // Create a new customer
 exports.createCustomer = async (req, res) => {
   try {
@@ -30,8 +31,6 @@ exports.createCustomer = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-
-
 
 // Get all customers with optional filters
 exports.getAllCustomers = async (req, res) => {
@@ -95,7 +94,6 @@ exports.getAllCustomers = async (req, res) => {
   }
 };
 
-
 // Get a customer by ID
 exports.getCustomerById = async (req, res) => {
   try {
@@ -129,8 +127,7 @@ exports.deleteCustomer = async (req, res) => {
   }
 };
 
-
-//DELETE ALL FOR DEV
+// DELETE ALL FOR DEV
 exports.deleteAllCustomers = async (req, res) => {
   try {
     const result = await Customer.deleteMany({});
@@ -142,7 +139,6 @@ exports.deleteAllCustomers = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // Get revenue based on filters
 exports.getRevenue = async (req, res) => {
@@ -199,10 +195,6 @@ exports.getRevenue = async (req, res) => {
   }
 };
 
-
-
-
-
 // Expiring Clients
 exports.getExpiringMemberships = async (req, res) => {
   try {
@@ -228,4 +220,26 @@ exports.getExpiringMemberships = async (req, res) => {
 
 
 
+exports.getUpcomingBirthdays = async (req, res) => {
+  try {
+    const today = moment().startOf('day');
+    const nextWeek = moment().add(7, 'days').endOf('day');
 
+    // Get customers with upcoming birthdays
+    const customers = await Customer.find();
+
+    // Filter customers with birthdays within the next 7 days (month and day)
+    const upcomingBirthdays = customers.filter((customer) => {
+      const dob = moment(customer.dateOfBirth); // Customer's birthdate (month/day only)
+      const currentYearDob = dob.clone().year(today.year()); // Set the customer's birthdate to this year
+
+      // Check if the birthday is within the next 7 days
+      return currentYearDob.isBetween(today, nextWeek, null, '[]'); // Inclusive comparison
+    });
+
+    res.status(200).json(upcomingBirthdays);
+  } catch (error) {
+    console.error("Error fetching upcoming birthdays:", error);
+    res.status(500).json({ error: "Failed to fetch upcoming birthdays" });
+  }
+};

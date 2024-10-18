@@ -21,11 +21,11 @@ app.use(cors());
 app.use(express.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-const PORT = process.env.PORT || 8000;
+const PORT = 8000;
 
 //connections
 mongoose
-  .connect("mongodb+srv://vijaysingh:Q7EYiv0fZ1ksby9H@cluster0.4uwrx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected!"))
   .catch((e) => console.log("Error: ", e));
 

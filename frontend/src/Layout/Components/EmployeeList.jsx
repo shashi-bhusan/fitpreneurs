@@ -1,20 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
-import Modal from './Modal';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import Modal from "./Modal";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const EmployeeList = ({ searchQuery, filter }) => {
   const [employees, setEmployees] = useState([]);
-  const [role, setRole] = useState('');
+  const [role, setRole] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedEmployeeCustomers, setSelectedEmployeeCustomers] = useState(
-    []
-  );
+  const [selectedEmployeeCustomers, setSelectedEmployeeCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
-  const [selectedEmployeeName, setSelectedEmployeeName] = useState('');
+  const [selectedEmployeeName, setSelectedEmployeeName] = useState("");
   const [page, setPage] = useState(1); // State for the current page
   const [totalPages, setTotalPages] = useState(1); // State for the total number of pages
   const limit = 7; // Items per page
@@ -22,7 +20,7 @@ const EmployeeList = ({ searchQuery, filter }) => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/employee', {
+        const response = await axios.get("https://server.fitpreneursapiens.com/api/employee", {
           params: {
             search: searchQuery,
             filter: filter,
@@ -33,8 +31,8 @@ const EmployeeList = ({ searchQuery, filter }) => {
         setEmployees(response.data.employees);
         setTotalPages(Math.ceil(response.data.total / limit)); // Calculate total pages based on response
       } catch (error) {
-        console.error('Error fetching employee data:', error);
-        toast.error('Failed to fetch employees.');
+        console.error("Error fetching employee data:", error);
+        toast.error("Failed to fetch employees.");
       }
     };
 
@@ -47,34 +45,34 @@ const EmployeeList = ({ searchQuery, filter }) => {
   }, [searchQuery, filter]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       try {
         const decoded = jwtDecode(token);
         setRole(decoded.role);
       } catch (error) {
-        console.error('Invalid token:', error);
-        setRole('');
+        console.error("Invalid token:", error);
+        setRole("");
       }
     }
   }, []);
 
   const handleDelete = async (id) => {
-    if (role !== 'admin') {
-      alert('You do not have permission to delete employees.');
+    if (role !== "admin") {
+      alert("You do not have permission to delete employees.");
       return;
     }
 
-    if (!window.confirm('Are you sure you want to delete this employee?'))
+    if (!window.confirm("Are you sure you want to delete this employee?"))
       return;
 
     try {
-      await axios.delete(`http://localhost:8000/api/employee/${id}`);
+      await axios.delete(`https://server.fitpreneursapiens.com/api/employee/${id}`);
       setEmployees(employees.filter((employee) => employee._id !== id));
-      toast.success('Employee deleted successfully.');
+      toast.success("Employee deleted successfully.");
     } catch (error) {
-      console.error('Error deleting employee:', error);
-      toast.error('Failed to delete employee.');
+      console.error("Error deleting employee:", error);
+      toast.error("Failed to delete employee.");
     }
   };
 
@@ -83,15 +81,15 @@ const EmployeeList = ({ searchQuery, filter }) => {
     setSelectedEmployeeName(employee.fullname);
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/employee/${employee._id}/customers`
+        `https://server.fitpreneursapiens.com/api/employee/${employee._id}/customers`
       );
       setSelectedEmployeeCustomers(response.data);
     } catch (error) {
       if (error.response && error.response.status === 404) {
         setSelectedEmployeeCustomers([]);
       } else {
-        console.error('Error fetching customers:', error);
-        toast.error('Failed to fetch customers.');
+        console.error("Error fetching customers:", error);
+        toast.error("Failed to fetch customers.");
       }
     } finally {
       setIsModalOpen(true);
@@ -100,12 +98,10 @@ const EmployeeList = ({ searchQuery, filter }) => {
   };
 
   const closeModal = () => {
-    setIsModalOpen(false); // Trigger the closing animation
-    setTimeout(() => {
-      setSelectedEmployeeCustomers([]);
-      setSelectedCustomer(null);
-      setSelectedEmployeeName(''); // Reset after animation delay
-    }, 300);
+    setIsModalOpen(false);
+    setSelectedEmployeeCustomers([]);
+    setSelectedCustomer(null);
+    setSelectedEmployeeName("");
   };
 
   const handleCustomerSelect = (e) => {
@@ -207,7 +203,7 @@ const EmployeeList = ({ searchQuery, filter }) => {
           onClick={() => handlePageChange(page - 1)}
           disabled={page === 1}
           className={`px-3 py-2 mx-1 rounded-lg text-white ${
-            page === 1 ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-800'
+            page === 1 ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-800"
           }`}
         >
           Previous
@@ -220,16 +216,17 @@ const EmployeeList = ({ searchQuery, filter }) => {
           disabled={page === totalPages}
           className={`px-3 py-2 mx-1 rounded-lg text-white ${
             page === totalPages
-              ? 'bg-gray-400'
-              : 'bg-blue-600 hover:bg-blue-800'
+              ? "bg-gray-400"
+              : "bg-blue-600 hover:bg-blue-800"
           }`}
         >
           Next
         </button>
       </div>
 
-      {/* Modal for displaying employee's customers */}
-      <Modal isOpen={isModalOpen} onClose={closeModal}>
+      
+       {/* Modal for displaying employee's customers */}
+       <Modal isOpen={isModalOpen} onClose={closeModal}>
         {loadingCustomers ? (
           <div className="flex justify-center items-center h-64">
             <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
@@ -238,8 +235,7 @@ const EmployeeList = ({ searchQuery, filter }) => {
           <div className="px-4 py-3">
             <div className="flex flex-col justify-center items-center mb-4">
               <h1 className="text-white font-serif text-2xl text-center mb-3 font-semibold">
-                <span className="capitalize">{selectedEmployeeName}</span>'s
-                Client
+                <span className="capitalize">{selectedEmployeeName}</span>'s Client
               </h1>
               <div className="rounded-full overflow-hidden">
                 <img

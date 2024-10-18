@@ -10,6 +10,7 @@ import Role from "./Pages/Role";
 import Signup from "./Pages/Signup";
 import Profile from "./Pages/Profile";
 import Expiration from "./Pages/Expiration"
+import Birthdays from "./Pages/Birthdays"
 import CustomerWithPt from "./Pages/CustomerWithPt"
 import ClientInfo from "./Layout/Components/ClientInfo"
 import ProtectedRoute from "./Layout/Components/ProtectedRoute";
@@ -36,6 +37,7 @@ function App() {
         <Route path="/profile" element={<ProtectedRoute Component={() => <Layout Maincontent={Profile} />} />} />
         <Route path="/role" element={<ProtectedRoute Component={Role} />} />
         <Route path="/expiration" element={<ProtectedRoute Component={() => <Layout Maincontent={Expiration} />} />} />
+        <Route path="/birthday" element={<ProtectedRoute Component={() => <Layout Maincontent={Birthdays} />} />} />
         <Route path="/client/:id" element={<ProtectedRoute Component={() => <Layout Maincontent={ClientInfo} />} />} />
       </Routes>
     </BrowserRouter>

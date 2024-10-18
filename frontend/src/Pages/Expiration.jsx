@@ -12,7 +12,7 @@ const ExpiringMemberships = () => {
   const fetchExpiringCustomers = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/customer/expiring-memberships"
+        "https://server.fitpreneursapiens.com/api/customer/expiring-memberships"
       );
       const customers = response.data.filter((customer) => {
         const daysLeft = moment(customer.membershipEndDate).diff(

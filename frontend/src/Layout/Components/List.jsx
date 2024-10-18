@@ -17,7 +17,7 @@ const List = ({ searchQuery, filter }) => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/customer", {
+        const response = await axios.get("https://server.fitpreneursapiens.com/api/customer", {
           params: {
             search: searchQuery,
             filter: filter,
@@ -64,7 +64,7 @@ const List = ({ searchQuery, filter }) => {
       return;
 
     try {
-      await axios.delete(`http://localhost:8000/api/customer/${id}`);
+      await axios.delete(`https://server.fitpreneursapiens.com/api/customer/${id}`);
       setCustomers(customers.filter((customer) => customer._id !== id));
       toast.success("Customer deleted successfully.");
     } catch (error) {
@@ -219,7 +219,9 @@ const List = ({ searchQuery, filter }) => {
                     as="h3"
                     className="text-lg font-medium leading-6 text-white flex flex-col justify-center items-center"
                   >
-                    <p className="font-serif text-2xl font-bold">Client Details</p>
+                    <p className="font-serif text-2xl font-bold">
+                      Client Details
+                    </p>
                     <div className="rounded-full overflow-hidden mt-3">
                       <img src="/gymmm.gif" alt="gif" className="h-36" />
                     </div>
@@ -237,6 +239,12 @@ const List = ({ searchQuery, filter }) => {
                         <p>
                           <strong>Email ID:</strong> {selectedCustomer.emailId}
                         </p>
+                        <p>
+                          <strong>DOB:</strong>{" "}
+                          {new Date(
+                            selectedCustomer.dateOfBirth
+                          ).toLocaleDateString()}
+                        </p>
                         <p className="capitalize">
                           <strong>Address:</strong> {selectedCustomer.address}
                         </p>
@@ -247,39 +255,51 @@ const List = ({ searchQuery, filter }) => {
                           ).toLocaleDateString("en-GB")}
                         </p>
                         <p>
-                          <strong>Membership Plan:</strong> {selectedCustomer.plan}
+                          <strong>Membership Plan:</strong>{" "}
+                          {selectedCustomer.plan}
                         </p>
                         <p>
-                          <strong>Membership Plan Cost:</strong> {selectedCustomer.planCost}
+                          <strong>Membership Plan Cost:</strong>{" "}
+                          {selectedCustomer.planCost}
                         </p>
                         <p>
-                          <strong>Session Type:</strong> {selectedCustomer.sessionType}
+                          <strong>Session Type:</strong>{" "}
+                          {selectedCustomer.sessionType}
                         </p>
                         <p>
-                          <strong>Session Cost:</strong> {selectedCustomer.sessionCost}
+                          <strong>Session Cost:</strong>{" "}
+                          {selectedCustomer.sessionCost}
                         </p>
                         <p>
-                          <strong>Total Cost:</strong> {selectedCustomer.totalAmount}
+                          <strong>Total Cost:</strong>{" "}
+                          {selectedCustomer.totalAmount}
                         </p>
                         <p>
-                          <strong>Paid Amount:</strong> {selectedCustomer.amountPaid}
+                          <strong>Paid Amount:</strong>{" "}
+                          {selectedCustomer.amountPaid}
                         </p>
                         <p>
-                          <strong>Payment Mode:</strong> {selectedCustomer.paymentMode}
+                          <strong>Payment Mode:</strong>{" "}
+                          {selectedCustomer.paymentMode}
                         </p>
                         <p>
                           <strong>Debt:</strong> {selectedCustomer.debt}
                         </p>
                         <p>
-                          <strong>Membership Start:</strong> {new Date(selectedCustomer.membershipStartDate).toLocaleDateString("en-GB")}
+                          <strong>Membership Start:</strong>{" "}
+                          {new Date(
+                            selectedCustomer.membershipStartDate
+                          ).toLocaleDateString("en-GB")}
                         </p>
                         <p>
-                          <strong>Membership End:</strong> {new Date(selectedCustomer.membershipEndDate).toLocaleDateString("en-GB")}
+                          <strong>Membership End:</strong>{" "}
+                          {new Date(
+                            selectedCustomer.membershipEndDate
+                          ).toLocaleDateString("en-GB")}
                         </p>
                         <p className="capitalize">
                           <strong>Status:</strong> {selectedCustomer.status}
                         </p>
-            
                       </div>
                     )}
                   </div>

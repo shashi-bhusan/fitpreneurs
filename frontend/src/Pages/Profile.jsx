@@ -18,7 +18,7 @@ const Profile = () => {
 
   const fetchCustomers = async (employeeId) => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/employee/${employeeId}/customers`);
+      const response = await axios.get(`https://server.fitpreneursapiens.com/api/employee/${employeeId}/customers`);
       console.log("Fetched customers:", response.data);
       setCustomers(response.data);
     } catch (error) {

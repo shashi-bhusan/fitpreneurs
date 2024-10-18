@@ -23,7 +23,7 @@ const Signup = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:8000/api/employee", {
+      const response = await axios.post("https://server.fitpreneursapiens.com/api/employee", {
         fullname: formData.name,
         emailId: formData.email,
         mobileNumber: formData.mobileNumber,

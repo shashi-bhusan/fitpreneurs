@@ -17,7 +17,7 @@ const List = ({ searchQuery, filter }) => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/ptcustomer", {
+        const response = await axios.get("https://server.fitpreneursapiens.com/api/ptcustomer", {
           params: {
             search: searchQuery,
             filter: filter,
@@ -64,7 +64,7 @@ const List = ({ searchQuery, filter }) => {
       return;
 
     try {
-      await axios.put(`http://localhost:8000/api/customer/${id}`,{sessionType: "0 Sessions"});
+      await axios.put(`https://server.fitpreneursapiens.com/api/customer/${id}`,{sessionType: "0 Sessions"});
       setCustomers(customers.filter((customer) => customer._id !== id));
       toast.success("Customer sessions removed successfully.");
     } catch (error) {

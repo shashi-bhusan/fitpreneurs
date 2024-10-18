@@ -3,7 +3,7 @@ import Item from "../Layout/Components/Item";
 // import { RiCustomerService2Line } from "react-icons/ri";
 import { BsPersonVcard } from "react-icons/bs";
 import { MdCurrencyRupee, MdGroupAdd } from "react-icons/md";
-import { HiOutlineUsers, HiXCircle } from "react-icons/hi";
+import { HiOutlineUsers, HiXCircle, HiOutlineCake } from "react-icons/hi";
 
 const DashBoard = () => {
   return (
@@ -34,6 +34,11 @@ const DashBoard = () => {
                 img: HiXCircle,
                 name: "Expirations",
                 redirectURL: "/expiration"
+            }}/>
+            <Item data={{
+                img: HiOutlineCake,
+                name: "Birthdays",
+                redirectURL: "/birthday"
             }}/>
         </div>
       </div>

@@ -16,6 +16,10 @@ const customerSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    dateOfBirth: {
+      type: Date,
+      required: true,
+    },
     address: {
       type: String,
       required: true,

@@ -13,7 +13,7 @@ const ClientDetails = () => {
       try {
         const employeeNamesArray = await Promise.all(
           clientData.assignedEmployees.map(async (employeeId) => {
-            const response = await axios.get(`http://localhost:8000/api/employee/${employeeId}`);
+            const response = await axios.get(`https://server.fitpreneursapiens.com/api/employee/${employeeId}`);
             return response.data.fullname;
           })
         );

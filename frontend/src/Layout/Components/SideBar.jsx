@@ -68,6 +68,14 @@ const SideBar = () => {
         >
           Expirations
         </li>
+        <li
+          className={`p-1 py-2 rounded-lg px-3 cursor-pointer text-nowrap ${getActiveClass(
+            "/birthday"
+          )}`}
+          onClick={() => navigate("/birthday")}
+        >
+          Birthdays
+        </li>
       </ul>
     </div>
   );
