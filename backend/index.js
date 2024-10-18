@@ -21,7 +21,7 @@ app.use(cors());
 app.use(express.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-const PORT = 8000;
+const PORT = 3000;
 
 //connections
 mongoose
