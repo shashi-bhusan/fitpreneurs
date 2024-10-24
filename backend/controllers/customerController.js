@@ -1,12 +1,28 @@
-const Customer = require("../models/customer");
-const Employee = require("../models/employee");
+const Customer = require('../models/customer');
+const Employee = require('../models/employee');
 const moment = require('moment');
-
 
 // Create a new customer
 exports.createCustomer = async (req, res) => {
   try {
-    const { plan, planCost = 0, sessionType = "", sessionCost = 0, amountPaid = 0 } = req.body;
+    const {
+      plan,
+      planCost = 0,
+      sessionType = '',
+      sessionCost = 0,
+      amountPaid = 0,
+      membershipStartDate,
+    } = req.body;
+
+    // Validate planStartDate
+    const startDate = new Date(membershipStartDate);
+    const minStartDate = new Date('2024-01-01');
+
+    if (startDate < minStartDate) {
+      return res
+        .status(400)
+        .json({ message: 'Plan start date cannot be before January 1, 2024.' });
+    }
 
     // Ensure all costs are numbers
     const planCostNum = parseFloat(planCost);
@@ -17,9 +33,38 @@ exports.createCustomer = async (req, res) => {
     const totalAmount = planCostNum + sessionCostNum;
     const debt = totalAmount - amountPaidNum;
 
+    // Calculate membershipEndDate based on the selected plan and start date
+    let membershipEndDate;
+
+    switch (plan) {
+      case 'Per Day':
+        membershipEndDate = new Date(startDate);
+        membershipEndDate.setDate(startDate.getDate() + 1);
+        break;
+      case '1 month':
+        membershipEndDate = new Date(startDate);
+        membershipEndDate.setMonth(startDate.getMonth() + 1);
+        break;
+      case '3 months':
+        membershipEndDate = new Date(startDate);
+        membershipEndDate.setMonth(startDate.getMonth() + 3);
+        break;
+      case '6 months':
+        membershipEndDate = new Date(startDate);
+        membershipEndDate.setMonth(startDate.getMonth() + 6);
+        break;
+      case '12 months':
+        membershipEndDate = new Date(startDate);
+        membershipEndDate.setFullYear(startDate.getFullYear() + 1);
+        break;
+      default:
+        return res.status(400).json({ message: 'Invalid membership plan.' });
+    }
+
     // Create customer object
     const customer = new Customer({
       ...req.body,
+      membershipEndDate,
       totalAmount,
       debt,
     });
@@ -41,19 +86,19 @@ exports.getAllCustomers = async (req, res) => {
     // Search by fullname, emailId, mobileNumber, or address
     if (search) {
       query.$or = [
-        { fullname: { $regex: search, $options: "i" } },
-        { emailId: { $regex: search, $options: "i" } },
-        { mobileNumber: { $regex: search, $options: "i" } },
-        { address: { $regex: search, $options: "i" } },
+        { fullname: { $regex: search, $options: 'i' } },
+        { emailId: { $regex: search, $options: 'i' } },
+        { mobileNumber: { $regex: search, $options: 'i' } },
+        { address: { $regex: search, $options: 'i' } },
       ];
     }
 
     // Filter by date
-    if (filter === "last7Days") {
+    if (filter === 'last7Days') {
       query.createdAt = {
         $gte: new Date(new Date().setDate(new Date().getDate() - 7)),
       };
-    } else if (filter === "last30Days") {
+    } else if (filter === 'last30Days') {
       query.createdAt = {
         $gte: new Date(new Date().setDate(new Date().getDate() - 30)),
       };
@@ -68,12 +113,12 @@ exports.getAllCustomers = async (req, res) => {
         page: 1,
         pages: 1,
       });
-    } 
+    }
 
     // Otherwise, paginate the results
-    const pageNum = parseInt(page, 10);   //parsing base 10 
+    const pageNum = parseInt(page, 10); //parsing base 10
     const limitNum = parseInt(limit, 10);
-    const skip = (pageNum - 1) * limitNum;   //skips prev page's data
+    const skip = (pageNum - 1) * limitNum; //skips prev page's data
 
     const [customers, totalCustomers] = await Promise.all([
       Customer.find(query)
@@ -98,7 +143,8 @@ exports.getAllCustomers = async (req, res) => {
 exports.getCustomerById = async (req, res) => {
   try {
     const customer = await Customer.findById(req.params.id);
-    if (!customer) return res.status(404).json({ message: "Customer not found" });
+    if (!customer)
+      return res.status(404).json({ message: 'Customer not found' });
     res.status(200).json(customer);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -108,8 +154,11 @@ exports.getCustomerById = async (req, res) => {
 // Update a customer
 exports.updateCustomer = async (req, res) => {
   try {
-    const customer = await Customer.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!customer) return res.status(404).json({ message: "Customer not found" });
+    const customer = await Customer.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!customer)
+      return res.status(404).json({ message: 'Customer not found' });
     res.status(200).json(customer);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -120,8 +169,9 @@ exports.updateCustomer = async (req, res) => {
 exports.deleteCustomer = async (req, res) => {
   try {
     const customer = await Customer.findByIdAndDelete(req.params.id);
-    if (!customer) return res.status(404).json({ message: "Customer not found" });
-    res.status(200).json({ message: "Customer deleted successfully" });
+    if (!customer)
+      return res.status(404).json({ message: 'Customer not found' });
+    res.status(200).json({ message: 'Customer deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -132,9 +182,12 @@ exports.deleteAllCustomers = async (req, res) => {
   try {
     const result = await Customer.deleteMany({});
     if (result.deletedCount === 0) {
-      return res.status(404).json({ message: "No customers found to delete" });
+      return res.status(404).json({ message: 'No customers found to delete' });
     }
-    res.status(200).json({ message: "All customers deleted successfully", deletedCount: result.deletedCount });
+    res.status(200).json({
+      message: 'All customers deleted successfully',
+      deletedCount: result.deletedCount,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -145,9 +198,9 @@ exports.getRevenue = async (req, res) => {
   try {
     const { filter, year, month } = req.query;
     let start, end;
-    
+
     // Determine date range based on filter or default to current month
-    if (filter === "specificMonth" && year && month) {
+    if (filter === 'specificMonth' && year && month) {
       start = new Date(year, month - 1, 1); // month is 0-indexed
       end = new Date(year, month, 1);
     } else {
@@ -169,9 +222,9 @@ exports.getRevenue = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: "$amountPaid" },
-          membershipRevenue: { $sum: "$planCost" },
-          sessionRevenue: { $sum: "$sessionCost" },
+          totalRevenue: { $sum: '$amountPaid' },
+          membershipRevenue: { $sum: '$planCost' },
+          sessionRevenue: { $sum: '$sessionCost' },
         },
       },
     ]);
@@ -213,12 +266,10 @@ exports.getExpiringMemberships = async (req, res) => {
     // Send the expiring customers as the response
     res.status(200).json(expiringCustomers);
   } catch (error) {
-    console.error("Error fetching expiring memberships:", error);
-    res.status(500).json({ error: "Failed to fetch expiring memberships" });
+    console.error('Error fetching expiring memberships:', error);
+    res.status(500).json({ error: 'Failed to fetch expiring memberships' });
   }
 };
-
-
 
 exports.getUpcomingBirthdays = async (req, res) => {
   try {
@@ -239,7 +290,7 @@ exports.getUpcomingBirthdays = async (req, res) => {
 
     res.status(200).json(upcomingBirthdays);
   } catch (error) {
-    console.error("Error fetching upcoming birthdays:", error);
-    res.status(500).json({ error: "Failed to fetch upcoming birthdays" });
+    console.error('Error fetching upcoming birthdays:', error);
+    res.status(500).json({ error: 'Failed to fetch upcoming birthdays' });
   }
 };

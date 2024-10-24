@@ -1,28 +1,28 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
-import Select from "react-select";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import Select from 'react-select';
+import { useNavigate } from 'react-router-dom';
 
 const AddCustomer = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    fullname: "",
-    emailId: "",
-    mobileNumber: "",
-    dateOfBirth: "", // Updated field name to match the backend
-    address: "",
-    plan: "",
+    fullname: '',
+    emailId: '',
+    mobileNumber: '',
+    dateOfBirth: '', // Updated field name to match the backend
+    address: '',
+    plan: '',
     planCost: 0,
-    sessionType: "",
+    sessionType: '',
     sessionCost: 0,
     assignedEmployees: [],
     totalAmount: 0,
     amountPaid: 0,
     debt: 0,
-    paymentMode: "cash",
+    paymentMode: 'cash',
   });
 
   const [selectedEmployees, setSelectedEmployees] = useState([]);
@@ -33,7 +33,7 @@ const AddCustomer = () => {
     const fetchEmployees = async () => {
       try {
         const response = await axios.get(
-          "https://server.fitpreneursapiens.com/api/employee?all=true"
+          'https://server.fitpreneursapiens.com/api/employee?all=true'
         );
         setEmployees(response.data.employees.reverse());
       } catch (error) {
@@ -52,9 +52,9 @@ const AddCustomer = () => {
     }));
 
     if (
-      name === "planCost" ||
-      name === "sessionCost" ||
-      name === "amountPaid"
+      name === 'planCost' ||
+      name === 'sessionCost' ||
+      name === 'amountPaid'
     ) {
       calculateTotal({ ...formData, [name]: value });
     }
@@ -66,7 +66,7 @@ const AddCustomer = () => {
     if (!event.target.checked) {
       calculateTotal({
         ...formData,
-        sessionType: "",
+        sessionType: '',
         sessionCost: 0,
       });
     }
@@ -107,6 +107,7 @@ const AddCustomer = () => {
       address: formData.address,
       plan: formData.plan,
       planCost: formData.planCost,
+      membershipStartDate: formData.membershipStartDate,
       totalAmount: formData.totalAmount,
       amountPaid: formData.amountPaid,
       debt: formData.debt,
@@ -121,17 +122,17 @@ const AddCustomer = () => {
 
     try {
       const response = await axios.post(
-        "https://server.fitpreneursapiens.com/api/customer",
+        'http://localhost:3000/api/customer',
         dataToSend,
         {
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         }
       );
 
-      alert("Customer data submitted successfully!");
+      alert('Customer data submitted successfully!');
       navigate(`/client/${response.data._id}`, { state: response.data });
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error('Error submitting form:', error);
       alert(
         `Error submitting the data: Make Sure The Email/Phone No. is unique (${error.message})`
       );
@@ -213,7 +214,7 @@ const AddCustomer = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
             <Form.Group controlId="formBasicPlan" className="w-full">
               <Form.Label>Membership Plan</Form.Label>
               <Form.Control
@@ -230,6 +231,18 @@ const AddCustomer = () => {
                 <option value="6 months">6 Months</option>
                 <option value="12 months">12 Months</option>
               </Form.Control>
+            </Form.Group>
+
+            <Form.Group controlId="formBasicPlanStartDate" className="w-full">
+              <Form.Label>Plan Start Date</Form.Label>
+              <Form.Control
+                type="date"
+                name="membershipStartDate"
+                value={formData.membershipStartDate}
+                onChange={handleChange}
+                required
+                min="2024-01-01" // Set the minimum date to January 1, 2024
+              />
             </Form.Group>
 
             <Form.Group controlId="formBasicPlanCost" className="w-full">
@@ -327,31 +340,30 @@ const AddCustomer = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-  <Form.Group controlId="formBasicDebt" className="w-full">
-    <Form.Label>Debt</Form.Label>
-    <Form.Control
-      type="number"
-      name="debt"
-      value={formData.debt}
-      readOnly
-    />
-  </Form.Group>
+            <Form.Group controlId="formBasicDebt" className="w-full">
+              <Form.Label>Debt</Form.Label>
+              <Form.Control
+                type="number"
+                name="debt"
+                value={formData.debt}
+                readOnly
+              />
+            </Form.Group>
 
-  <div className="w-full">
-    <label className="block mb-1">Assigned Employees</label>
-    <Select
-      isMulti
-      options={employees.map((emp) => ({
-        value: emp._id,
-        label: emp.fullname,
-      }))}
-      onChange={setSelectedEmployees}
-      value={selectedEmployees}
-      className="text-black"
-    />
-  </div>
-</div>
-
+            <div className="w-full">
+              <label className="block mb-1">Assigned Employees</label>
+              <Select
+                isMulti
+                options={employees.map((emp) => ({
+                  value: emp._id,
+                  label: emp.fullname,
+                }))}
+                onChange={setSelectedEmployees}
+                value={selectedEmployees}
+                className="text-black"
+              />
+            </div>
+          </div>
 
           <Button variant="primary" type="submit">
             Add Customer
