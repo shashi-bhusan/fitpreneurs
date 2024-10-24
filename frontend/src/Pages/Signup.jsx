@@ -59,7 +59,7 @@ const Signup = () => {
               <Form.Label>Full Name</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="John Doe"
+                placeholder="Ramesh Yadav"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
@@ -70,7 +70,7 @@ const Signup = () => {
               <Form.Label>Email address</Form.Label>
               <Form.Control
                 type="email"
-                placeholder="johndoe@gmail.com"
+                placeholder="ramesh@gmail.com"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
@@ -103,7 +103,8 @@ const Signup = () => {
               <Form.Label>Address</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="123 Main St, Anytown, USA"
+                placeholder="Gandhi Nagar, Delhi, India
+      "
                 name="address"
                 value={formData.address}
                 onChange={handleChange}

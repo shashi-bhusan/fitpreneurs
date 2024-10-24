@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
-import { Dialog, Transition } from "@headlessui/react";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+import { Dialog, Transition } from '@headlessui/react';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import moment from 'moment';
 
 const List = ({ searchQuery, filter }) => {
   const [customers, setCustomers] = useState([]);
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -17,19 +18,22 @@ const List = ({ searchQuery, filter }) => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await axios.get("https://server.fitpreneursapiens.com/api/customer", {
-          params: {
-            search: searchQuery,
-            filter: filter,
-            page: page,
-            limit: limit,
-          },
-        });
+        const response = await axios.get(
+          'https://server.fitpreneursapiens.com/api/customer',
+          {
+            params: {
+              search: searchQuery,
+              filter: filter,
+              page: page,
+              limit: limit,
+            },
+          }
+        );
         setCustomers(response.data.customers);
         setTotalPages(Math.ceil(response.data.total / limit));
       } catch (error) {
-        console.error("Error fetching customer data:", error);
-        toast.error("Failed to fetch customers.");
+        console.error('Error fetching customer data:', error);
+        toast.error('Failed to fetch customers.');
       }
     };
 
@@ -37,14 +41,14 @@ const List = ({ searchQuery, filter }) => {
   }, [searchQuery, filter, page]);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     if (token) {
       try {
         const decoded = jwtDecode(token);
         setRole(decoded.role);
       } catch (error) {
-        console.error("Invalid token:", error);
-        setRole("");
+        console.error('Invalid token:', error);
+        setRole('');
       }
     }
   }, []);
@@ -55,21 +59,23 @@ const List = ({ searchQuery, filter }) => {
   }, [searchQuery, filter]);
 
   const handleDelete = async (id) => {
-    if (role !== "admin") {
-      alert("You do not have permission to delete customers.");
+    if (role !== 'admin') {
+      alert('You do not have permission to delete customers.');
       return;
     }
 
-    if (!window.confirm("Are you sure you want to delete this customer?"))
+    if (!window.confirm('Are you sure you want to delete this customer?'))
       return;
 
     try {
-      await axios.delete(`https://server.fitpreneursapiens.com/api/customer/${id}`);
+      await axios.delete(
+        `https://server.fitpreneursapiens.com/api/customer/${id}`
+      );
       setCustomers(customers.filter((customer) => customer._id !== id));
-      toast.success("Customer deleted successfully.");
+      toast.success('Customer deleted successfully.');
     } catch (error) {
-      console.error("Error deleting customer:", error);
-      toast.error("Failed to delete customer.");
+      console.error('Error deleting customer:', error);
+      toast.error('Failed to delete customer.');
     }
   };
 
@@ -108,6 +114,9 @@ const List = ({ searchQuery, filter }) => {
               <th className="px-3 py-2 text-left text-base font-medium uppercase tracking-wider">
                 Plan
               </th>
+              <th className="px-3 py-2 text-left text-base font-medium uppercase tracking-wider">
+                Expires In
+              </th>
               <th className="px-3 py-2 text-center text-base font-medium uppercase tracking-wider">
                 Actions
               </th>
@@ -135,6 +144,20 @@ const List = ({ searchQuery, filter }) => {
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
                     {customer.plan}
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    {/* {(() => {
+                      const startDate = new Date();
+                      const endDate = new Date(customer.membershipEndDate);
+                      const diffTime = endDate - startDate; // Difference in milliseconds
+                      const diffDays = Math.ceil(
+                        diffTime / (1000 * 60 * 60 * 24)
+                      ); // Convert to days
+                      return diffDays; // Display the difference in days
+                    })()}{' '}
+                    days */}
+                    {moment(customer.membershipEndDate).diff(moment(), 'days')}{' '}
+                    days
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap flex items-center justify-center">
                     <button
@@ -167,7 +190,7 @@ const List = ({ searchQuery, filter }) => {
           onClick={() => handlePageChange(page - 1)}
           disabled={page === 1}
           className={`px-3 py-2 mx-1 rounded-lg text-white ${
-            page === 1 ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-800"
+            page === 1 ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-800'
           }`}
         >
           Previous
@@ -180,8 +203,8 @@ const List = ({ searchQuery, filter }) => {
           disabled={page === totalPages}
           className={`px-3 py-2 mx-1 rounded-lg text-white ${
             page === totalPages
-              ? "bg-gray-400"
-              : "bg-blue-600 hover:bg-blue-800"
+              ? 'bg-gray-400'
+              : 'bg-blue-600 hover:bg-blue-800'
           }`}
         >
           Next
@@ -233,14 +256,14 @@ const List = ({ searchQuery, filter }) => {
                           <strong>Name:</strong> {selectedCustomer.fullname}
                         </p>
                         <p>
-                          <strong>Mobile No.:</strong>{" "}
+                          <strong>Mobile No.:</strong>{' '}
                           {selectedCustomer.mobileNumber}
                         </p>
                         <p>
                           <strong>Email ID:</strong> {selectedCustomer.emailId}
                         </p>
                         <p>
-                          <strong>DOB:</strong>{" "}
+                          <strong>DOB:</strong>{' '}
                           {new Date(
                             selectedCustomer.dateOfBirth
                           ).toLocaleDateString()}
@@ -249,53 +272,53 @@ const List = ({ searchQuery, filter }) => {
                           <strong>Address:</strong> {selectedCustomer.address}
                         </p>
                         <p>
-                          <strong>Joined On:</strong>{" "}
+                          <strong>Joined On:</strong>{' '}
                           {new Date(
                             selectedCustomer.createdAt
-                          ).toLocaleDateString("en-GB")}
+                          ).toLocaleDateString('en-GB')}
                         </p>
                         <p>
-                          <strong>Membership Plan:</strong>{" "}
+                          <strong>Membership Plan:</strong>{' '}
                           {selectedCustomer.plan}
                         </p>
                         <p>
-                          <strong>Membership Plan Cost:</strong>{" "}
+                          <strong>Membership Plan Cost:</strong>{' '}
                           {selectedCustomer.planCost}
                         </p>
                         <p>
-                          <strong>Session Type:</strong>{" "}
+                          <strong>Session Type:</strong>{' '}
                           {selectedCustomer.sessionType}
                         </p>
                         <p>
-                          <strong>Session Cost:</strong>{" "}
+                          <strong>Session Cost:</strong>{' '}
                           {selectedCustomer.sessionCost}
                         </p>
                         <p>
-                          <strong>Total Cost:</strong>{" "}
+                          <strong>Total Cost:</strong>{' '}
                           {selectedCustomer.totalAmount}
                         </p>
                         <p>
-                          <strong>Paid Amount:</strong>{" "}
+                          <strong>Paid Amount:</strong>{' '}
                           {selectedCustomer.amountPaid}
                         </p>
                         <p>
-                          <strong>Payment Mode:</strong>{" "}
+                          <strong>Payment Mode:</strong>{' '}
                           {selectedCustomer.paymentMode}
                         </p>
                         <p>
                           <strong>Debt:</strong> {selectedCustomer.debt}
                         </p>
                         <p>
-                          <strong>Membership Start:</strong>{" "}
+                          <strong>Membership Start:</strong>{' '}
                           {new Date(
                             selectedCustomer.membershipStartDate
-                          ).toLocaleDateString("en-GB")}
+                          ).toLocaleDateString('en-GB')}
                         </p>
                         <p>
-                          <strong>Membership End:</strong>{" "}
+                          <strong>Membership End:</strong>{' '}
                           {new Date(
                             selectedCustomer.membershipEndDate
-                          ).toLocaleDateString("en-GB")}
+                          ).toLocaleDateString('en-GB')}
                         </p>
                         <p className="capitalize">
                           <strong>Status:</strong> {selectedCustomer.status}
