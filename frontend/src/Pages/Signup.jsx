@@ -104,7 +104,7 @@ const Signup = () => {
               <Form.Control
                 type="text"
                 placeholder="Gandhi Nagar, Delhi, India
-                "
+      "
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
