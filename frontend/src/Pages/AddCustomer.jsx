@@ -122,7 +122,7 @@ const AddCustomer = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:3000/api/customer',
+        'https://server.fitpreneursapiens.com/api/customer',
         dataToSend,
         {
           headers: { 'Content-Type': 'application/json' },
@@ -134,7 +134,7 @@ const AddCustomer = () => {
     } catch (error) {
       console.error('Error submitting form:', error);
       alert(
-        `Error submitting the data: Make Sure The Email/Phone No. is unique (${error.message})`
+        `Error submitting the data: (${error.message})`
       );
     }
   };
