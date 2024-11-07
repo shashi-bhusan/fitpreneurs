@@ -1,30 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import Select from 'react-select';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
+import Select from "react-select";
+import { useNavigate, useParams } from "react-router-dom";
+import { BASE_URL } from "../utils/constants";
 
 const AddCustomer = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const [formData, setFormData] = useState({
-    fullname: '',
-    emailId: '',
-    mobileNumber: '',
-    dateOfBirth: '', // Updated field name to match the backend
-    address: '',
-    plan: '',
+    fullname: "",
+    emailId: "",
+    mobileNumber: "",
+    dateOfBirth: "",
+    address: "",
+    plan: "",
     planCost: 0,
-    sessionType: '',
+    membershipStartDate: "",
+    sessionType: "0 Sessions",
     sessionCost: 0,
     assignedEmployees: [],
     totalAmount: 0,
-    amountPaid: 0,
+    payments: [], // New field for payments array
     debt: 0,
-    paymentMode: 'cash',
+    paymentMode: "cash",
+    initialPayment: 0, // New field for first payment
   });
-
+  const [isUpdate, setIsUpdate] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [showSessionOptions, setShowSessionOptions] = useState(false);
   const [employees, setEmployees] = useState([]);
@@ -33,7 +37,7 @@ const AddCustomer = () => {
     const fetchEmployees = async () => {
       try {
         const response = await axios.get(
-          'https://server.fitpreneursapiens.com/api/employee?all=true'
+          `${BASE_URL}/employee?all=true`
         );
         setEmployees(response.data.employees.reverse());
       } catch (error) {
@@ -44,19 +48,85 @@ const AddCustomer = () => {
     fetchEmployees();
   }, []);
 
+  useEffect(() => {
+    const fetchCustomerData = async () => {
+      if (id) {
+        try {
+          const response = await axios.get(
+            `${BASE_URL}/customer/${id}`
+             
+          );
+          const customer = response.data;
+
+          const formattedDOB = customer.dateOfBirth
+            ? customer.dateOfBirth.split("T")[0]
+            : "";
+          const formattedStartDate = customer.membershipStartDate
+            ? customer.membershipStartDate.split("T")[0]
+            : "";
+
+          setFormData({
+            fullname: customer.fullname,
+            emailId: customer.emailId,
+            mobileNumber: customer.mobileNumber,
+            dateOfBirth: formattedDOB,
+            address: customer.address,
+            plan: customer.plan,
+            planCost: customer.planCost,
+            sessionType: customer.sessionType,
+            sessionCost: customer.sessionCost,
+            membershipStartDate: formattedStartDate,
+            assignedEmployees: customer.assignedEmployees,
+            totalAmount: customer.totalAmount,
+            amountPaid: customer.amountPaid,
+            debt: customer.debt,
+            paymentMode: customer.paymentMode,
+          });
+          console.log("formData", formData);
+
+          setIsUpdate(true);
+          setShowSessionOptions(customer.sessionType !== "0 Sessions");
+
+          if (customer.assignedEmployees.length > 0) {
+            const selectedEmps = employees
+              .filter((emp) => customer.assignedEmployees.includes(emp._id))
+              .map((emp) => ({
+                value: emp._id,
+                label: emp.fullname,
+              }));
+            setSelectedEmployees(selectedEmps);
+          }
+        } catch (error) {
+          console.error("Error fetching customer data:", error);
+        }
+      }
+    };
+
+    if (id) {
+      setIsUpdate(true);
+      fetchCustomerData();
+    }
+  }, [id, employees]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
-
-    if (
-      name === 'planCost' ||
-      name === 'sessionCost' ||
-      name === 'amountPaid'
-    ) {
+  
+    if (name === "planCost" || name === "sessionCost") {
       calculateTotal({ ...formData, [name]: value });
+    }
+  
+    if (name === "initialPayment") {
+      const payment = parseFloat(value) || 0;
+      const total = formData.totalAmount;
+      setFormData(prev => ({
+        ...prev,
+        initialPayment: payment,
+        debt: total - payment
+      }));
     }
   };
 
@@ -66,7 +136,7 @@ const AddCustomer = () => {
     if (!event.target.checked) {
       calculateTotal({
         ...formData,
-        sessionType: '',
+        sessionType: "",
         sessionCost: 0,
       });
     }
@@ -98,44 +168,59 @@ const AddCustomer = () => {
     event.preventDefault();
 
     const assignedEmployees = selectedEmployees.map((emp) => emp.value);
+    const initialPayment = parseFloat(formData.initialPayment) || 0;
 
+
+    // Validate and format the data
     const dataToSend = {
-      fullname: formData.fullname,
-      emailId: formData.emailId,
-      mobileNumber: formData.mobileNumber,
-      dateOfBirth: formData.dateOfBirth, // Send date of birth data
-      address: formData.address,
+      fullname: formData.fullname.trim(),
+      emailId: formData.emailId.trim(),
+      mobileNumber: formData.mobileNumber.trim(),
+      dateOfBirth: formData.dateOfBirth,
+      address: formData.address.trim(),
       plan: formData.plan,
-      planCost: formData.planCost,
+      planCost: Number(formData.planCost),
       membershipStartDate: formData.membershipStartDate,
-      totalAmount: formData.totalAmount,
-      amountPaid: formData.amountPaid,
-      debt: formData.debt,
-      paymentMode: formData.paymentMode, // Added payment mode to data
+      totalAmount: Number(formData.totalAmount),
+      initialPayment: initialPayment, // Add this
+      paymentMode: formData.paymentMode, // Add this
       assignedEmployees: assignedEmployees,
     };
+    console.log("data", dataToSend);
+
 
     if (showSessionOptions) {
       dataToSend.sessionType = formData.sessionType;
-      dataToSend.sessionCost = formData.sessionCost;
+      dataToSend.sessionCost = Number(formData.sessionCost);
+    } else {
+      dataToSend.sessionType = "0 Sessions";
+      dataToSend.sessionCost = 0;
     }
 
     try {
-      const response = await axios.post(
-        'https://server.fitpreneursapiens.com/api/customer',
-        dataToSend,
-        {
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      const url = isUpdate
+        ? `${BASE_URL}/customer/${id}`
+        : `${BASE_URL}/customer`;
 
-      alert('Customer data submitted successfully!');
+      const method = isUpdate ? "put" : "post";
+
+      const response = await axios({
+        method,
+        url,
+        data: dataToSend,
+        headers: { "Content-Type": "application/json" },
+      });
+
+      alert(
+        isUpdate
+          ? "Customer updated successfully!"
+          : "Customer added successfully!"
+      );
       navigate(`/client/${response.data._id}`, { state: response.data });
     } catch (error) {
-      console.error('Error submitting form:', error);
-      alert(
-        `Error submitting the data: (${error.message})`
-      );
+      console.error("Error submitting form:", error);
+      const errorMessage = error.response?.data?.message || error.message;
+      alert(`Error: ${errorMessage}`);
     }
   };
 
@@ -193,7 +278,7 @@ const AddCustomer = () => {
                 <Form.Control
                   type="date"
                   name="dateOfBirth"
-                  value={formData.dob}
+                  value={formData.dateOfBirth}
                   onChange={handleChange}
                   required
                 />
@@ -315,15 +400,16 @@ const AddCustomer = () => {
               />
             </Form.Group>
 
-            <Form.Group controlId="formBasicAmountPaid" className="w-full">
-              <Form.Label>Amount Paid</Form.Label>
-              <Form.Control
-                type="number"
-                name="amountPaid"
-                value={formData.amountPaid}
-                onChange={handleChange}
-              />
-            </Form.Group>
+            <Form.Group controlId="formBasicInitialPayment" className="w-full">
+    <Form.Label>Initial Payment</Form.Label>
+    <Form.Control
+      type="number"
+      name="initialPayment"
+      value={formData.initialPayment}
+      onChange={handleChange}
+      max={formData.totalAmount}
+    />
+  </Form.Group>
 
             <Form.Group controlId="formBasicPaymentMode" className="w-full">
               <Form.Label>Payment Mode</Form.Label>
@@ -335,6 +421,7 @@ const AddCustomer = () => {
               >
                 <option value="cash">Cash</option>
                 <option value="online">Online</option>
+                <option value="upi">UPI</option>
               </Form.Control>
             </Form.Group>
           </div>
@@ -343,11 +430,11 @@ const AddCustomer = () => {
             <Form.Group controlId="formBasicDebt" className="w-full">
               <Form.Label>Debt</Form.Label>
               <Form.Control
-                type="number"
-                name="debt"
-                value={formData.debt}
-                readOnly
-              />
+    type="number"
+    name="debt"
+    value={formData.totalAmount - formData.initialPayment}
+    readOnly
+  />
             </Form.Group>
 
             <div className="w-full">
@@ -366,7 +453,7 @@ const AddCustomer = () => {
           </div>
 
           <Button variant="primary" type="submit">
-            Add Customer
+            {isUpdate ? "Update Customer" : "Add Customer"}
           </Button>
         </Form>
       </div>

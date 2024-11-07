@@ -25,7 +25,9 @@ const Mapping = () => {
 
   const paymentModes = [
     { value: "cash", label: "Cash" },
-    { value: "online", label: "Online" }
+    { value: "online", label: "Online" },
+    { value: "upi", label: "UPI" }
+
   ];
 
   useEffect(() => {
