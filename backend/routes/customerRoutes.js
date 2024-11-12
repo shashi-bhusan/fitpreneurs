@@ -15,6 +15,9 @@ router.put("/:id", customerController.updateCustomer);
 router.delete("/all", customerController.deleteAllCustomers);
 router.delete("/:id", customerController.deleteCustomer);
 
+router.get('/:id/payments', customerController.getPaymentHistory);
+router.post('/:id/payments', customerController.addPayment);
+
 
 
 

@@ -35,7 +35,7 @@ const customerSchema = new mongoose.Schema(
     ],
     plan: {
       type: String,
-      required: true, 
+      required: true,
     },
     planCost: {
       type: Number,
@@ -47,7 +47,7 @@ const customerSchema = new mongoose.Schema(
     },
     sessionCost: {
       type: Number,
-      default: 0, 
+      default: 0,
     },
     status: {
       type: String,
@@ -65,13 +65,29 @@ const customerSchema = new mongoose.Schema(
     paymentMode: {
       type: String,
       default: "cash",
-      enum: ["cash", "online"],
+      enum: ["cash", "online","upi"],
     },
+    payments: [
+      {
+        amount: {
+          type: Number,
+          required: true,
+        },
+        date: {
+          type: Date,
+          required: true,
+          default: Date.now,
+        },
+        mode: {
+          type: String,
+          enum: ["cash", "online", 'upi'],
+          required: true,
+        },
+      },
+    ],
     debt: {
       type: Number,
-      default: function () {
-        return this.totalAmount - this.amountPaid;
-      },
+      default: 0,
     },
     membershipStartDate: {
       type: Date,
