@@ -7,6 +7,7 @@ exports.createCustomer = async (req, res) => {
   try {
     const {
       plan,
+      planDays = 0,
       planCost = 0,
       sessionType = "",
       sessionCost = 0,
@@ -40,7 +41,7 @@ exports.createCustomer = async (req, res) => {
     switch (plan) {
       case "Per Day":
         membershipEndDate = new Date(startDate);
-        membershipEndDate.setDate(startDate.getDate() + 1);
+        membershipEndDate.setDate(startDate.getDate() + planDays);
         break;
       case "1 month":
         membershipEndDate = new Date(startDate);
@@ -65,12 +66,32 @@ exports.createCustomer = async (req, res) => {
     // Create initial payment record if amount paid > 0
     const payments = [];
     if (initialPaymentNum > 0) {
-      payments.push({
-        amount: initialPaymentNum,
-        date: new Date(),
-        mode: paymentMode,
-      });
+      if (sessionCostNum > 0) {
+        payments.push({
+          amount: sessionCostNum,
+          type: "session",
+          date: new Date(),
+          mode: paymentMode,
+          notes: "",
+        });
+      }
+      if (planCostNum > 0) {
+        payments.push({
+          amount: planCostNum,
+          type: "plan",
+          date: new Date(),
+          mode: paymentMode,
+          notes: "",
+        });
+      }
     }
+
+    const planHistory = [];
+    planHistory.push({
+      plan,
+      startDate,
+      endDate: membershipEndDate,
+    });
 
     // Create customer object
     const customer = new Customer({
@@ -79,11 +100,13 @@ exports.createCustomer = async (req, res) => {
       totalAmount,
       debt,
       payments,
+      planHistory,
     });
 
     await customer.save();
     res.status(201).json(customer);
   } catch (error) {
+    console.log(error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -172,6 +195,168 @@ exports.updateCustomer = async (req, res) => {
       return res.status(404).json({ message: "Customer not found" });
     res.status(200).json(customer);
   } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+exports.upgradeCustomer = async (req, res) => {
+  try {
+    const { plan, expiryDate, totalAmount, notes, mode } = req.body;
+
+    const membershipStartDate = new Date();
+    const membershipEndDate = new Date(expiryDate);
+
+    const customer = await Customer.findById(req.params.id);
+
+    customer.plan = plan;
+    customer.planCost = totalAmount;
+    customer.membershipStartDate = membershipStartDate;
+    customer.membershipEndDate = membershipEndDate;
+    customer.totalAmount = totalAmount;
+    customer.amountPaid = totalAmount;
+    customer.notes = notes;
+    customer.paymentMode = mode;
+
+    customer.planHistory.push({
+      plan,
+      startDate: membershipStartDate,
+      endDate: membershipEndDate,
+    });
+
+    customer.payments.push({
+      amount: totalAmount,
+      mode,
+      date: new Date(),
+      type: "plan",
+      notes,
+    });
+
+    await customer.save();
+
+    if (!customer)
+      return res.status(404).json({ message: "Customer not found" });
+    res.status(200).json(customer);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+exports.renewMembership = async (req, res) => {
+  try {
+    const { plan, totalAmount, notes, mode, planDays = 0 } = req.body;
+
+    let { startDate } = req.body;
+
+    // Ensure all costs are numbers
+    const planCostNum = parseFloat(totalAmount);
+
+    startDate = new Date(startDate);
+
+    // Calculate membershipEndDate based on the selected plan and start date
+    let membershipEndDate;
+
+    switch (plan) {
+      case "Per Day":
+        membershipEndDate = new Date(startDate);
+        membershipEndDate.setDate(startDate.getDate() + planDays);
+        break;
+      case "1 month":
+        membershipEndDate = new Date(startDate);
+        membershipEndDate.setMonth(startDate.getMonth() + 1);
+        break;
+      case "3 months":
+        membershipEndDate = new Date(startDate);
+        membershipEndDate.setMonth(startDate.getMonth() + 3);
+        break;
+      case "6 months":
+        membershipEndDate = new Date(startDate);
+        membershipEndDate.setMonth(startDate.getMonth() + 6);
+        break;
+      case "12 months":
+        membershipEndDate = new Date(startDate);
+        membershipEndDate.setFullYear(startDate.getFullYear() + 1);
+        break;
+      default:
+        return res.status(400).json({ message: "Invalid membership plan." });
+    }
+
+    const customer = await Customer.findById(req.params.id);
+
+    customer.plan = plan;
+    customer.planDays = planDays;
+    customer.planCost = totalAmount;
+    customer.membershipStartDate = startDate;
+    customer.membershipEndDate = membershipEndDate;
+    customer.totalAmount = totalAmount;
+    customer.amountPaid = totalAmount;
+    customer.notes = notes;
+    customer.paymentMode = mode;
+
+    customer.planHistory.push({
+      plan,
+      startDate: startDate,
+      endDate: membershipEndDate,
+    });
+
+    customer.payments.push({
+      amount: totalAmount,
+      mode,
+      date: new Date(),
+      type: "plan",
+      notes,
+    });
+
+    await customer.save();
+    res.status(200).json(customer);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+exports.updateCustomerStatus = async (req, res) => {
+  try {
+    const { status, freezeDays, totalAmount, notes, mode, expiryDate } =
+      req.body;
+
+    const customer = await Customer.findById(req.params.id);
+
+    if (status === "freeze") {
+      customer.status = status;
+      customer.freezeDays = freezeDays;
+
+      if (totalAmount) {
+        customer.payments.push({
+          amount: totalAmount,
+          mode,
+          date: new Date(),
+          type: "other",
+          notes: "freeze account",
+        });
+      }
+    }
+
+    if (status === "unfreeze") {
+      customer.status = "active";
+      customer.freezeDays = 0;
+      customer.membershipEndDate = new Date(expiryDate);
+
+      if (totalAmount) {
+        customer.payments.push({
+          amount: totalAmount,
+          mode,
+          date: new Date(),
+          type: "other",
+          notes: notes || "freeze account",
+        });
+      }
+    }
+
+    await customer.save();
+    res.status(200).json(customer);
+  } catch (error) {
+    console.log(error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -306,29 +491,27 @@ exports.getUpcomingBirthdays = async (req, res) => {
 // Update Payment
 exports.addPayment = async (req, res) => {
   try {
-    const { amount, mode = 'cash', date } = req.body;
+    const { totalAmount, mode, notes, type } = req.body;
     const customerId = req.params.id;
 
     const customer = await Customer.findById(customerId);
     if (!customer) {
-      return res.status(404).json({ message: 'Customer not found' });
+      return res.status(404).json({ message: "Customer not found" });
     }
 
-    const paymentAmount = parseFloat(amount);
+    if(type == "debt"){
+      customer.debt -= totalAmount;
+    }
 
-    // Create payment object with optional date
-    const payment = {
-      amount: paymentAmount,
-      mode,
-      date: date ? new Date(date) : new Date() // Use provided date or current date
-    };
-
-    // Add new payment
-    customer.payments.push(payment);
-
-    // Recalculate debt
-    const totalPaid = customer.payments.reduce((sum, p) => sum + p.amount, 0);
-    customer.debt = customer.totalAmount - totalPaid;
+    if (totalAmount) {
+      customer.payments.push({
+        amount: totalAmount,
+        mode,
+        date: new Date(),
+        type,
+        notes,
+      });
+    }
 
     await customer.save();
     res.status(200).json(customer);
@@ -341,20 +524,23 @@ exports.getPaymentHistory = async (req, res) => {
   try {
     const customer = await Customer.findById(req.params.id);
     if (!customer) {
-      return res.status(404).json({ message: 'Customer not found' });
+      return res.status(404).json({ message: "Customer not found" });
     }
 
     // Sort payments by date in descending order
-    const payments = [...customer.payments].sort((a, b) => 
-      new Date(b.date) - new Date(a.date)
+    const payments = [...customer.payments].sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
     );
+
+    // Calculate total amount paid
+    const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
 
     res.status(200).json({
       customerId: customer._id,
       customerName: customer.fullname,
-      totalAmount: customer.totalAmount,
+      totalAmount: totalPaid,
       debt: customer.debt,
-      payments: payments
+      payments: payments,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

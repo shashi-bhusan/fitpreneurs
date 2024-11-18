@@ -8,8 +8,6 @@ const customerSchema = new mongoose.Schema(
     },
     emailId: {
       type: String,
-      required: true,
-      unique: true,
     },
     mobileNumber: {
       type: String,
@@ -18,7 +16,6 @@ const customerSchema = new mongoose.Schema(
     },
     dateOfBirth: {
       type: Date,
-      required: true,
     },
     address: {
       type: String,
@@ -37,6 +34,9 @@ const customerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    planDays: {
+      type: Number,
+    },
     planCost: {
       type: Number,
       required: true,
@@ -54,6 +54,10 @@ const customerSchema = new mongoose.Schema(
       enum: ["active", "freeze", "transferred"],
       default: "active",
     },
+    freezeDays:{
+      type: Number,
+      default: 0
+    },
     totalAmount: {
       type: Number,
       required: true,
@@ -65,10 +69,15 @@ const customerSchema = new mongoose.Schema(
     paymentMode: {
       type: String,
       default: "cash",
-      enum: ["cash", "online","upi"],
+      enum: ["cash", "online", "upi"],
     },
     payments: [
       {
+        type: {
+          type: String,
+          enum: ["session", "plan", "debt", "other"], // Type of payment
+          required: true,
+        },
         amount: {
           type: Number,
           required: true,
@@ -80,8 +89,24 @@ const customerSchema = new mongoose.Schema(
         },
         mode: {
           type: String,
-          enum: ["cash", "online", 'upi'],
+          enum: ["cash", "online", "upi"],
           required: true,
+        },
+        notes: {
+          type: String,
+        },
+      },
+    ],
+    planHistory: [
+      {
+        plan: {
+          type: String,
+        },
+        startDate: {
+          type: Date,
+        },
+        endDate: {
+          type: Date,
         },
       },
     ],

@@ -12,6 +12,9 @@ router.post("/", customerController.createCustomer);
 router.get("/", customerController.getAllCustomers);
 router.get("/:id", customerController.getCustomerById);
 router.put("/:id", customerController.updateCustomer);
+router.put("/upgrade/:id", customerController.upgradeCustomer);
+router.put("/renew/:id", customerController.renewMembership);
+router.put("/status/:id", customerController.updateCustomerStatus);
 router.delete("/all", customerController.deleteAllCustomers);
 router.delete("/:id", customerController.deleteCustomer);
 
