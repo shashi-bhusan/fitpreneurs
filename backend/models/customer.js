@@ -16,10 +16,10 @@ const customerSchema = new mongoose.Schema(
     },
     dateOfBirth: {
       type: Date,
+      required: true,
     },
     address: {
       type: String,
-      required: true,
     },
     time: {
       type: String,
@@ -57,6 +57,10 @@ const customerSchema = new mongoose.Schema(
     freezeDays:{
       type: Number,
       default: 0
+    },
+    freezeDate:{
+      type: Date,
+      default: null
     },
     totalAmount: {
       type: Number,

@@ -13,6 +13,7 @@ exports.createCustomer = async (req, res) => {
       sessionCost = 0,
       initialPayment = 0,
       paymentMode = "cash",
+      paymentDate,
       membershipStartDate,
     } = req.body;
 
@@ -70,7 +71,7 @@ exports.createCustomer = async (req, res) => {
         payments.push({
           amount: sessionCostNum,
           type: "session",
-          date: new Date(),
+          date: new Date(paymentDate),
           mode: paymentMode,
           notes: "",
         });
@@ -79,7 +80,7 @@ exports.createCustomer = async (req, res) => {
         payments.push({
           amount: planCostNum,
           type: "plan",
-          date: new Date(),
+          date: new Date(paymentDate),
           mode: paymentMode,
           notes: "",
         });
@@ -99,6 +100,7 @@ exports.createCustomer = async (req, res) => {
       membershipEndDate,
       totalAmount,
       debt,
+      amountPaid: initialPaymentNum,
       payments,
       planHistory,
     });
@@ -317,7 +319,7 @@ exports.renewMembership = async (req, res) => {
 
 exports.updateCustomerStatus = async (req, res) => {
   try {
-    const { status, freezeDays, totalAmount, notes, mode, expiryDate } =
+    const { status, freezeDays, totalAmount, notes, mode, paymentDate, freezeDate, expiryDate } =
       req.body;
 
     const customer = await Customer.findById(req.params.id);
@@ -325,12 +327,13 @@ exports.updateCustomerStatus = async (req, res) => {
     if (status === "freeze") {
       customer.status = status;
       customer.freezeDays = freezeDays;
+      customer.freezeDate = new Date(freezeDate);
 
       if (totalAmount) {
         customer.payments.push({
           amount: totalAmount,
           mode,
-          date: new Date(),
+          date: new Date(paymentDate),
           type: "other",
           notes: "freeze account",
         });
@@ -340,13 +343,14 @@ exports.updateCustomerStatus = async (req, res) => {
     if (status === "unfreeze") {
       customer.status = "active";
       customer.freezeDays = 0;
+      customer.freezeDate = null;
       customer.membershipEndDate = new Date(expiryDate);
 
       if (totalAmount) {
         customer.payments.push({
           amount: totalAmount,
           mode,
-          date: new Date(),
+          date: new Date(paymentDate),
           type: "other",
           notes: notes || "freeze account",
         });
