@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import moment from "moment";
+import config from "../config/config";
 
 const UpcomingBirthdays = () => {
   const [customersWithBirthdays, setCustomersWithBirthdays] = useState([]);
@@ -12,7 +13,7 @@ const UpcomingBirthdays = () => {
   const fetchUpcomingBirthdays = async () => {
     try {
       const response = await axios.get(
-        "https://server.fitpreneursapiens.com/api/customer/upcoming-birthdays"
+        `${config.apiBaseUrl}/customer/upcoming-birthdays`
       );
       
       // Sort customers by nearest birthday

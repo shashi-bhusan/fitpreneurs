@@ -3,6 +3,7 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
 import Select from "react-select";
+import config from "../config/config";
 
 const Mapping = () => {
   const [employees, setEmployees] = useState([]);
@@ -31,11 +32,11 @@ const Mapping = () => {
   ];
 
   useEffect(() => {
-    axios.get("https://server.fitpreneursapiens.com/api/employee?all=true")
+    axios.get(`${config.apiBaseUrl}/employee?all=true`)
       .then((response) => setEmployees(response.data.employees.reverse()))
       .catch((error) => console.error(error));
 
-    axios.get("https://server.fitpreneursapiens.com/api/customer?all=true")
+    axios.get(`${config.apiBaseUrl}/customer?all=true`)
       .then((response) => setCustomers(response.data.customers))
       .catch((error) => console.error(error));
   }, []);
@@ -47,7 +48,7 @@ const Mapping = () => {
       return;
     }
 
-    axios.post("https://server.fitpreneursapiens.com/api/employee/assign", {
+    axios.post(`${config.apiBaseUrl}/employee/assign`, {
       customerId: selectedCustomer.value,
       employeeId: selectedEmployee.value,
       sessionType,

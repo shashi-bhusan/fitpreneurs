@@ -6,6 +6,7 @@ import List2 from "../Layout/Components/List2";
 import { useNavigate } from "react-router";
 import fileDownload from "js-file-download";
 import axios from "axios"
+import config from "../config/config";
 
 const CustomerWithPt = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,7 +27,7 @@ const CustomerWithPt = () => {
 
   const handleExport = async () => {
     try {
-      const response = await axios.get("https://server.fitpreneursapiens.com/api/export/exportcustomerwithpt", {
+      const response = await axios.get(`${config.apiBaseUrl}/export/exportcustomerwithpt`, {
         responseType: "blob",
       });
       fileDownload(response.data, "customers_with_pt-Sessions.xlsx");
@@ -54,13 +55,13 @@ const CustomerWithPt = () => {
               onChange={handleSearchChange}
               className="border rounded px-3 py-2 bg-stone-700 bg-opacity-50 text-stone-100"
             />
-            <button
+            {/* <button
               className="bg-[#574898] text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-600"
               onClick={() => navigate("/addcustomer")}
             >
               <FaPlus className="w-5 h-5" />
               <span>New Client</span>
-            </button>
+            </button> */}
             <button className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600" onClick={handleExport}>
               <FaDownload className="w-5 h-5" />
               <span>Export</span>

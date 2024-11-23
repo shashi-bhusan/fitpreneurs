@@ -4,6 +4,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import { FaDownload } from "react-icons/fa";
 import fileDownload from "js-file-download";
+import config from "../config/config";
 
 const RevenuePage = () => {
   const [startDate, setStartDate] = useState(new Date());
@@ -16,7 +17,9 @@ const RevenuePage = () => {
 
   const fetchCashOnline = async () => {
     try {
-      const response = await axios.get("https://server.fitpreneursapiens.com/api/revenue/monthly-revenue");
+      const response = await axios.get(
+        `${config.apiBaseUrl}/revenue/monthly-revenue`
+      );
       console.log("Cash and Online API Response:", response.data);
       setCashRevenue(response.data.cashRevenue || 0);
       setOnlineRevenue(response.data.onlineRevenue || 0);
@@ -30,19 +33,30 @@ const RevenuePage = () => {
       const currentYear = selectedDate.getFullYear();
       const currentMonth = selectedDate.getMonth() + 1;
 
-      const apiUrl =
-        selectedDate.getMonth() === new Date().getMonth() &&
-        selectedDate.getFullYear() === new Date().getFullYear()
-          ? `https://server.fitpreneursapiens.com/api/customer/revenue`
-          : `https://server.fitpreneursapiens.com/api/customer/revenue?filter=specificMonth&month=${currentMonth}&year=${currentYear}`;
+      // const apiUrl =
+      //   selectedDate.getMonth() === new Date().getMonth() &&
+      //   selectedDate.getFullYear() === new Date().getFullYear()
+      //     ? `${config.apiBaseUrl}/customer/revenue`
+      //     : `${config.apiBaseUrl}/customer/revenue?filter=specificMonth&month=${currentMonth}&year=${currentYear}`;
 
-      const response = await axios.get(apiUrl);
+      // const response = await axios.get(apiUrl);
+
+      let response = await axios({
+        method: "GET",
+        url: `${config.apiBaseUrl}/revenue/new-revenue`,
+        params: {
+          month: currentMonth,
+          year: currentYear,
+        },
+      });
       console.log("API Response:", response.data);
 
-      setRevenueData(response.data.revenueData || []);
+      setRevenueData(response.data || []);
       setTotalRevenue(response.data.totalRevenue || 0);
+      setCashRevenue(response.data.cashRevenue || 0);
       setMembershipRevenue(response.data.membershipRevenue || 0);
-      setSessionRevenue(response.data.sessionRevenue || 0);
+      setSessionRevenue(response.data.sessionsRevenue || 0);
+      setOnlineRevenue(response.data.onlineUpiRevenue || 0);
     } catch (error) {
       console.error("Error fetching revenue data:", error);
     }
@@ -50,14 +64,17 @@ const RevenuePage = () => {
 
   useEffect(() => {
     fetchRevenueData(startDate);
-    fetchCashOnline();
+    // fetchCashOnline();
   }, [startDate]);
 
   const handleAllCashExport = async () => {
     try {
-      const response = await axios.get("https://server.fitpreneursapiens.com/api/export/exportcustomers", {
-        responseType: "blob",
-      });
+      const response = await axios.get(
+        `${config.apiBaseUrl}/export/exportcustomers`,
+        {
+          responseType: "blob",
+        }
+      );
       fileDownload(response.data, "customers.xlsx");
     } catch (err) {
       console.error("Error exporting customers:", err);
@@ -66,9 +83,12 @@ const RevenuePage = () => {
 
   const handlePtExport = async () => {
     try {
-      const response = await axios.get("https://server.fitpreneursapiens.com/api/export/exportcustomerwithpt", {
-        responseType: "blob",
-      });
+      const response = await axios.get(
+        `${config.apiBaseUrl}/export/exportcustomerwithpt`,
+        {
+          responseType: "blob",
+        }
+      );
       fileDownload(response.data, "customers_with_pt-Sessions.xlsx");
     } catch (err) {
       console.error("Error exporting customers with Sessions:", err);
@@ -76,9 +96,12 @@ const RevenuePage = () => {
   };
   const handleCashExport = async () => {
     try {
-      const response = await axios.get("https://server.fitpreneursapiens.com/api/export/customerpaidcash", {
-        responseType: "blob",
-      });
+      const response = await axios.get(
+        `${config.apiBaseUrl}/export/customerpaidcash`,
+        {
+          responseType: "blob",
+        }
+      );
       fileDownload(response.data, "customers_paid_with_cash.xlsx");
     } catch (err) {
       console.error("Error exporting customers with Cash payment:", err);
@@ -86,9 +109,12 @@ const RevenuePage = () => {
   };
   const handleOnlineExport = async () => {
     try {
-      const response = await axios.get("https://server.fitpreneursapiens.com/api/export/customerpaidonline", {
-        responseType: "blob",
-      });
+      const response = await axios.get(
+        `${config.apiBaseUrl}/export/customerpaidonline`,
+        {
+          responseType: "blob",
+        }
+      );
       fileDownload(response.data, "customers_paid_online.xlsx");
     } catch (err) {
       console.error("Error exporting customers with Online payment:", err);
@@ -141,7 +167,9 @@ const RevenuePage = () => {
       <div className="bg-stone-700 bg-opacity-80 text-white shadow-lg rounded-lg p-6 mb-6 flex justify-between items-center">
         <div className="left">
           <h2 className="text-2xl font-bold">Cash Revenue</h2>
-          <p className="text-4xl text-green-500 mt-2">₹{cashRevenue.toLocaleString()}</p>
+          <p className="text-4xl text-green-500 mt-2">
+            ₹{cashRevenue.toLocaleString()}
+          </p>
         </div>
         <div>
           <button
@@ -158,7 +186,9 @@ const RevenuePage = () => {
       <div className="bg-stone-700 bg-opacity-80 text-white shadow-lg rounded-lg p-6 mb-6 flex justify-between items-center">
         <div className="left">
           <h2 className="text-2xl font-bold">Online Revenue</h2>
-          <p className="text-4xl text-blue-500 mt-2">₹{onlineRevenue.toLocaleString()}</p>
+          <p className="text-4xl text-blue-500 mt-2">
+            ₹{onlineRevenue.toLocaleString()}
+          </p>
         </div>
         <div>
           <button

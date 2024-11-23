@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import moment from 'moment';
+import config from '../../config/config';
 
 function Notifications() {
   const [expiringCustomers, setExpiringCustomers] = useState([]);
@@ -34,7 +35,7 @@ function Notifications() {
   const fetchExpiringCustomers = async () => {
     try {
       const response = await axios.get(
-        'https://server.fitpreneursapiens.com/api/customer/expiring-memberships'
+        `${config.apiBaseUrl}/customer/expiring-memberships`
       );
 
       const customers = response.data.filter((customer) => {

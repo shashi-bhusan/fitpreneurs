@@ -6,6 +6,7 @@ import List from "../Layout/Components/List";
 import { useNavigate } from "react-router";
 import fileDownload from "js-file-download";
 import axios from "axios"
+import config from "../config/config";
 
 const Customers = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,7 +27,7 @@ const Customers = () => {
 
   const handleExport = async () => {
     try {
-      const response = await axios.get("https://server.fitpreneursapiens.com/api/export/exportcustomers", {
+      const response = await axios.get(`${config.apiBaseUrl}/export/exportcustomers`, {
         responseType: "blob", // Important for file download
       });
       fileDownload(response.data, "customers.xlsx");

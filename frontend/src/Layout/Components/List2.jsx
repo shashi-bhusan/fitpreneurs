@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { Dialog, Transition } from "@headlessui/react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import config from "../../config/config";
 
 const List = ({ searchQuery, filter }) => {
   const [customers, setCustomers] = useState([]);
@@ -17,7 +18,7 @@ const List = ({ searchQuery, filter }) => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await axios.get("https://server.fitpreneursapiens.com/api/ptcustomer", {
+        const response = await axios.get(`${config.apiBaseUrl}/ptcustomer`, {
           params: {
             search: searchQuery,
             filter: filter,
@@ -64,7 +65,7 @@ const List = ({ searchQuery, filter }) => {
       return;
 
     try {
-      await axios.put(`https://server.fitpreneursapiens.com/api/customer/${id}`,{sessionType: "0 Sessions"});
+      await axios.put(`${config.apiBaseUrl}/customer/${id}`,{sessionType: "0 Sessions"});
       setCustomers(customers.filter((customer) => customer._id !== id));
       toast.success("Customer sessions removed successfully.");
     } catch (error) {

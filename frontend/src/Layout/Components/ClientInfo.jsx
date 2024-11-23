@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import axios from "axios";
+import config from "../../config/config";
 
 const ClientDetails = () => {
   const { state: clientData } = useLocation();
@@ -13,7 +14,7 @@ const ClientDetails = () => {
       try {
         const employeeNamesArray = await Promise.all(
           clientData.assignedEmployees.map(async (employeeId) => {
-            const response = await axios.get(`https://server.fitpreneursapiens.com/api/employee/${employeeId}`);
+            const response = await axios.get(`${config.apiBaseUrl}/employee/${employeeId}`);
             return response.data.fullname;
           })
         );
@@ -52,6 +53,11 @@ const ClientDetails = () => {
       employeeNames.length > 0 ? employeeNames.join(", ") : "None",
     ]);
     tableRows.push(["Membership Plan", clientData.plan]);
+
+    if(clientData.plan == "Per Day"){
+      tableRows.push(["Membership Plan Days", clientData.planDays]);
+    }
+
     tableRows.push(["Membership Plan Cost", `${clientData.planCost}/-`]);
     tableRows.push(["Session Type", clientData.sessionType]);
     tableRows.push(["Session Cost", `${clientData.sessionCost}/-`]);
@@ -100,6 +106,11 @@ const ClientDetails = () => {
           <p>
             <strong>Membership Plan:</strong> {clientData.plan}
           </p>
+          {clientData.plan == "Per Day" && (
+            <p>
+              <strong>Membership Plan Days:</strong> {clientData.planDays}
+            </p>
+          )}
           <p>
             <strong>Membership Plan Cost:</strong> ₹{clientData.planCost}
           </p>
@@ -115,11 +126,15 @@ const ClientDetails = () => {
           <p>
             <strong>Amount Paid:</strong> ₹{clientData.amountPaid}
           </p>
-          <p>
+          {/* <p>
             <strong>Payment Mode:</strong> ₹{clientData.paymentMode}
-          </p>
+          </p> */}
           <p>
             <strong>Debt:</strong> ₹{clientData.debt}
+          </p>
+          <p>
+            <strong>Last Payment Date:</strong>{" "}
+            {formatDate(clientData.payments[0]?.date)}
           </p>
           <p>
             <strong>Membership Start Date:</strong>{" "}

@@ -3,6 +3,7 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import config from "../config/config";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("https://server.fitpreneursapiens.com/api/login", {
+      const response = await axios.post(`${config.apiBaseUrl}/login`, {
         emailId: email, 
         password: password,
       });
