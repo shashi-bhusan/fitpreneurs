@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import Modal from "./Modal";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import config from "../../config/config";
 
 const EmployeeList = ({ searchQuery, filter }) => {
   const [employees, setEmployees] = useState([]);
@@ -20,7 +21,7 @@ const EmployeeList = ({ searchQuery, filter }) => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await axios.get("https://server.fitpreneursapiens.com/api/employee", {
+        const response = await axios.get(`${config.apiBaseUrl}/employee`, {
           params: {
             search: searchQuery,
             filter: filter,
@@ -67,7 +68,7 @@ const EmployeeList = ({ searchQuery, filter }) => {
       return;
 
     try {
-      await axios.delete(`https://server.fitpreneursapiens.com/api/employee/${id}`);
+      await axios.delete(`${config.apiBaseUrl}/employee/${id}`);
       setEmployees(employees.filter((employee) => employee._id !== id));
       toast.success("Employee deleted successfully.");
     } catch (error) {
@@ -81,7 +82,7 @@ const EmployeeList = ({ searchQuery, filter }) => {
     setSelectedEmployeeName(employee.fullname);
     try {
       const response = await axios.get(
-        `https://server.fitpreneursapiens.com/api/employee/${employee._id}/customers`
+        `${config.apiBaseUrl}/employee/${employee._id}/customers`
       );
       setSelectedEmployeeCustomers(response.data);
     } catch (error) {
@@ -128,7 +129,7 @@ const EmployeeList = ({ searchQuery, filter }) => {
               <th className="px-3 py-2 text-left text-base font-medium uppercase tracking-wider">
                 Mobile No.
               </th>
-              <th className="px-3 py-2 text-left text-base font-medium uppercase tracking-wider">
+              {/* <th className="px-3 py-2 text-left text-base font-medium uppercase tracking-wider">
                 Email ID
               </th>
               <th className="px-3 py-2 text-left text-base font-medium uppercase tracking-wider">
@@ -136,7 +137,7 @@ const EmployeeList = ({ searchQuery, filter }) => {
               </th>
               <th className="px-3 py-2 text-left text-base font-medium uppercase tracking-wider">
                 Role
-              </th>
+              </th> */}
               <th className="px-3 py-2 text-center text-base font-medium uppercase tracking-wider">
                 Clients
               </th>
@@ -155,7 +156,7 @@ const EmployeeList = ({ searchQuery, filter }) => {
                   <td className="px-3 py-2 whitespace-nowrap">
                     {employee.mobileNumber}
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  {/* <td className="px-3 py-2 whitespace-nowrap">
                     {employee.emailId}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap capitalize">
@@ -163,7 +164,7 @@ const EmployeeList = ({ searchQuery, filter }) => {
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap capitalize">
                     {employee.role}
-                  </td>
+                  </td> */}
                   <td className="px-3 py-2 whitespace-nowrap flex items-center justify-center">
                     <button
                       className="bg-stone-600 text-white text-sm px-3 py-2 rounded-lg hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-stone-500"

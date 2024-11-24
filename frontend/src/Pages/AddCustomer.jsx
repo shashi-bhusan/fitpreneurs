@@ -17,16 +17,19 @@ const AddCustomer = () => {
     dateOfBirth: "",
     address: "",
     plan: "",
-    planCost: 0,
+    planDays: 0,
+    planCost: "",
     membershipStartDate: "",
     sessionType: "0 Sessions",
-    sessionCost: 0,
+    sessionCost: "",
     assignedEmployees: [],
     totalAmount: 0,
     payments: [], // New field for payments array
-    debt: 0,
+    planDebt: 0,
+    sessionDebt: 0,
     paymentMode: "cash",
-    initialPayment: 0, // New field for first payment
+    paymentDate: "",
+    initialPayment: "", // New field for first payment
   });
   const [isUpdate, setIsUpdate] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
@@ -36,9 +39,7 @@ const AddCustomer = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await axios.get(
-          `${BASE_URL}/employee?all=true`
-        );
+        const response = await axios.get(`${BASE_URL}/employee?all=true`);
         setEmployees(response.data.employees.reverse());
       } catch (error) {
         console.error(error);
@@ -52,10 +53,7 @@ const AddCustomer = () => {
     const fetchCustomerData = async () => {
       if (id) {
         try {
-          const response = await axios.get(
-            `${BASE_URL}/customer/${id}`
-             
-          );
+          const response = await axios.get(`${BASE_URL}/customer/${id}`);
           const customer = response.data;
 
           const formattedDOB = customer.dateOfBirth
@@ -72,6 +70,7 @@ const AddCustomer = () => {
             dateOfBirth: formattedDOB,
             address: customer.address,
             plan: customer.plan,
+            planDays: customer.planDays,
             planCost: customer.planCost,
             sessionType: customer.sessionType,
             sessionCost: customer.sessionCost,
@@ -79,8 +78,10 @@ const AddCustomer = () => {
             assignedEmployees: customer.assignedEmployees,
             totalAmount: customer.totalAmount,
             amountPaid: customer.amountPaid,
-            debt: customer.debt,
+            planDebt: customer.planDebt,
+            sessionDebt: customer.sessionDebt,
             paymentMode: customer.paymentMode,
+            paymentDate: customer.paymentDate,
           });
           console.log("formData", formData);
 
@@ -114,20 +115,20 @@ const AddCustomer = () => {
       ...prevState,
       [name]: value,
     }));
-  
+
     if (name === "planCost" || name === "sessionCost") {
       calculateTotal({ ...formData, [name]: value });
     }
-  
-    if (name === "initialPayment") {
-      const payment = parseFloat(value) || 0;
-      const total = formData.totalAmount;
-      setFormData(prev => ({
-        ...prev,
-        initialPayment: payment,
-        debt: total - payment
-      }));
-    }
+
+    // if (name === "initialPayment" && value !== "") {
+    //   const payment = parseFloat(value) || 0;
+    //   const total = formData.totalAmount;
+    //   setFormData((prev) => ({
+    //     ...prev,
+    //     initialPayment: payment,
+    //     planDebt: total - payment,
+    //   }));
+    // }
   };
 
   const handleCheckboxChange = (event) => {
@@ -155,12 +156,12 @@ const AddCustomer = () => {
       total += parseFloat(sessionCost) || 0;
     }
 
-    const debt = total - (amountPaid ? parseFloat(amountPaid) : 0);
+    // const planDebt = total - (amountPaid ? parseFloat(amountPaid) : 0);
 
     setFormData((prevState) => ({
       ...prevState,
       totalAmount: total,
-      debt: debt,
+      // planDebt: planDebt,
     }));
   };
 
@@ -170,7 +171,6 @@ const AddCustomer = () => {
     const assignedEmployees = selectedEmployees.map((emp) => emp.value);
     const initialPayment = parseFloat(formData.initialPayment) || 0;
 
-
     // Validate and format the data
     const dataToSend = {
       fullname: formData.fullname.trim(),
@@ -179,22 +179,26 @@ const AddCustomer = () => {
       dateOfBirth: formData.dateOfBirth,
       address: formData.address.trim(),
       plan: formData.plan,
+      planDays: Number(formData.planDays),
       planCost: Number(formData.planCost),
       membershipStartDate: formData.membershipStartDate,
       totalAmount: Number(formData.totalAmount),
-      initialPayment: initialPayment, // Add this
-      paymentMode: formData.paymentMode, // Add this
+      initialPayment: initialPayment, 
+      planDebt: Number(formData.planDebt),
+      paymentMode: formData.paymentMode, 
+      paymentDate: formData.paymentDate, 
       assignedEmployees: assignedEmployees,
     };
     console.log("data", dataToSend);
 
-
     if (showSessionOptions) {
       dataToSend.sessionType = formData.sessionType;
       dataToSend.sessionCost = Number(formData.sessionCost);
+      dataToSend.sessionDebt = Number(formData.sessionDebt);
     } else {
       dataToSend.sessionType = "0 Sessions";
       dataToSend.sessionCost = 0;
+      dataToSend.sessionDebt = 0;
     }
 
     try {
@@ -251,7 +255,6 @@ const AddCustomer = () => {
                   name="emailId"
                   value={formData.emailId}
                   onChange={handleChange}
-                  required
                 />
               </Form.Group>
             </div>
@@ -280,7 +283,6 @@ const AddCustomer = () => {
                   name="dateOfBirth"
                   value={formData.dateOfBirth}
                   onChange={handleChange}
-                  required
                 />
               </Form.Group>
             </div>
@@ -299,7 +301,11 @@ const AddCustomer = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+          <div
+            className={`grid grid-cols-1 ${
+              formData.plan == "Per Day" ? "sm:grid-cols-4" : "sm:grid-cols-3"
+            } gap-3 mb-3`}
+          >
             <Form.Group controlId="formBasicPlan" className="w-full">
               <Form.Label>Membership Plan</Form.Label>
               <Form.Control
@@ -317,6 +323,19 @@ const AddCustomer = () => {
                 <option value="12 months">12 Months</option>
               </Form.Control>
             </Form.Group>
+
+            {formData.plan == "Per Day" && (
+              <Form.Group controlId="formBasicPlanDays" className="w-full">
+                <Form.Label>Days</Form.Label>
+                <Form.Control
+                  type="number"
+                  name="planDays"
+                  value={formData.planDays}
+                  onChange={handleChange}
+                  disabled={!formData.plan}
+                />
+              </Form.Group>
+            )}
 
             <Form.Group controlId="formBasicPlanStartDate" className="w-full">
               <Form.Label>Plan Start Date</Form.Label>
@@ -401,15 +420,15 @@ const AddCustomer = () => {
             </Form.Group>
 
             <Form.Group controlId="formBasicInitialPayment" className="w-full">
-    <Form.Label>Initial Payment</Form.Label>
-    <Form.Control
-      type="number"
-      name="initialPayment"
-      value={formData.initialPayment}
-      onChange={handleChange}
-      max={formData.totalAmount}
-    />
-  </Form.Group>
+              <Form.Label>Initial Payment</Form.Label>
+              <Form.Control
+                type="number"
+                name="initialPayment"
+                value={formData.initialPayment}
+                onChange={handleChange}
+                max={formData.totalAmount}
+              />
+            </Form.Group>
 
             <Form.Group controlId="formBasicPaymentMode" className="w-full">
               <Form.Label>Payment Mode</Form.Label>
@@ -426,15 +445,35 @@ const AddCustomer = () => {
             </Form.Group>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-3">
             <Form.Group controlId="formBasicDebt" className="w-full">
-              <Form.Label>Debt</Form.Label>
+              <Form.Label>Plan Debt</Form.Label>
               <Form.Control
-    type="number"
-    name="debt"
-    value={formData.totalAmount - formData.initialPayment}
-    readOnly
-  />
+                type="number"
+                name="planDebt"
+                value={formData.planDebt}
+                onChange={handleChange}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="formBasicDebt" className="w-full">
+              <Form.Label>Session Debt</Form.Label>
+              <Form.Control
+                type="number"
+                name="sessionDebt"
+                value={formData.sessionDebt}
+                onChange={handleChange}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="formBasicDate" className="w-full">
+              <Form.Label>Payment Date</Form.Label>
+              <Form.Control
+                type="date"
+                name="paymentDate"
+                value={formData.paymentDate}
+                onChange={handleChange}
+              />
             </Form.Group>
 
             <div className="w-full">

@@ -1,6 +1,7 @@
 const Customer = require("../models/customer");
 const Employee = require("../models/employee");
 const moment = require("moment");
+const mongoose = require("mongoose");
 
 // Create a new customer
 exports.createCustomer = async (req, res) => {
@@ -13,7 +14,11 @@ exports.createCustomer = async (req, res) => {
       sessionCost = 0,
       initialPayment = 0,
       paymentMode = "cash",
+      paymentDate,
+      planDebt,
+      sessionDebt,
       membershipStartDate,
+      assignedEmployees
     } = req.body;
 
     // Validate planStartDate
@@ -31,9 +36,9 @@ exports.createCustomer = async (req, res) => {
     const sessionCostNum = parseFloat(sessionCost);
     const initialPaymentNum = parseFloat(initialPayment);
 
-    // Calculate total amount and debt
+    // Calculate total amount and planDebt
     const totalAmount = planCostNum + sessionCostNum;
-    const debt = totalAmount - initialPaymentNum;
+    // const planDebt = totalAmount - initialPaymentNum;
 
     // Calculate membershipEndDate based on the selected plan and start date
     let membershipEndDate;
@@ -68,20 +73,20 @@ exports.createCustomer = async (req, res) => {
     if (initialPaymentNum > 0) {
       if (sessionCostNum > 0) {
         payments.push({
-          amount: sessionCostNum,
+          amount: sessionCostNum - sessionDebt,
           type: "session",
-          date: new Date(),
+          date: new Date(paymentDate),
           mode: paymentMode,
-          notes: "",
+          notes: "session",
         });
       }
       if (planCostNum > 0) {
         payments.push({
-          amount: planCostNum,
+          amount: planCostNum - planDebt,
           type: "plan",
-          date: new Date(),
+          date: new Date(paymentDate),
           mode: paymentMode,
-          notes: "",
+          notes: "membership",
         });
       }
     }
@@ -98,9 +103,12 @@ exports.createCustomer = async (req, res) => {
       ...req.body,
       membershipEndDate,
       totalAmount,
-      debt,
+      planDebt,
+      sessionDebt,
+      amountPaid: initialPaymentNum,
       payments,
       planHistory,
+      assignedEmployees: assignedEmployees.map((emp) => new mongoose.Types.ObjectId(emp)),
     });
 
     await customer.save();
@@ -201,21 +209,20 @@ exports.updateCustomer = async (req, res) => {
 
 exports.upgradeCustomer = async (req, res) => {
   try {
-    const { plan, expiryDate, totalAmount, notes, mode } = req.body;
-
-    const membershipStartDate = new Date();
-    const membershipEndDate = new Date(expiryDate);
+    const { plan, expiryDate, totalAmount } = req.body;
 
     const customer = await Customer.findById(req.params.id);
 
+    const membershipStartDate = new Date(customer.membershipStartDate);
+    const membershipEndDate = new Date(expiryDate);
+
     customer.plan = plan;
-    customer.planCost = totalAmount;
-    customer.membershipStartDate = membershipStartDate;
+    customer.planCost = customer.planCost + Number(totalAmount);
+    // customer.membershipStartDate = membershipStartDate;
     customer.membershipEndDate = membershipEndDate;
-    customer.totalAmount = totalAmount;
-    customer.amountPaid = totalAmount;
-    customer.notes = notes;
-    customer.paymentMode = mode;
+    customer.totalAmount = customer.totalAmount + Number(totalAmount);
+    // customer.amountPaid = totalAmount;
+    customer.planDebt = customer.planDebt + Number(totalAmount);
 
     customer.planHistory.push({
       plan,
@@ -223,13 +230,13 @@ exports.upgradeCustomer = async (req, res) => {
       endDate: membershipEndDate,
     });
 
-    customer.payments.push({
-      amount: totalAmount,
-      mode,
-      date: new Date(),
-      type: "plan",
-      notes,
-    });
+    // customer.payments.push({
+    //   amount: totalAmount,
+    //   mode,
+    //   date: new Date(),
+    //   type: "plan",
+    //   notes,
+    // });
 
     await customer.save();
 
@@ -244,7 +251,7 @@ exports.upgradeCustomer = async (req, res) => {
 
 exports.renewMembership = async (req, res) => {
   try {
-    const { plan, totalAmount, notes, mode, planDays = 0 } = req.body;
+    const { plan, totalAmount, planDays = 0 } = req.body;
 
     let { startDate } = req.body;
 
@@ -286,12 +293,13 @@ exports.renewMembership = async (req, res) => {
     customer.plan = plan;
     customer.planDays = planDays;
     customer.planCost = totalAmount;
+    customer.sessionCost = 0;
+    customer.sessionType = "0 Sessions";
     customer.membershipStartDate = startDate;
     customer.membershipEndDate = membershipEndDate;
     customer.totalAmount = totalAmount;
-    customer.amountPaid = totalAmount;
-    customer.notes = notes;
-    customer.paymentMode = mode;
+    customer.amountPaid = 0;
+    customer.planDebt += Number(totalAmount);
 
     customer.planHistory.push({
       plan,
@@ -299,13 +307,13 @@ exports.renewMembership = async (req, res) => {
       endDate: membershipEndDate,
     });
 
-    customer.payments.push({
-      amount: totalAmount,
-      mode,
-      date: new Date(),
-      type: "plan",
-      notes,
-    });
+    // customer.payments.push({
+    //   amount: totalAmount,
+    //   mode,
+    //   date: new Date(paymentDate),
+    //   type: "plan",
+    //   notes,
+    // });
 
     await customer.save();
     res.status(200).json(customer);
@@ -317,7 +325,7 @@ exports.renewMembership = async (req, res) => {
 
 exports.updateCustomerStatus = async (req, res) => {
   try {
-    const { status, freezeDays, totalAmount, notes, mode, expiryDate } =
+    const { status, freezeDays, totalAmount, notes, mode, paymentDate, freezeDate, expiryDate } =
       req.body;
 
     const customer = await Customer.findById(req.params.id);
@@ -325,13 +333,14 @@ exports.updateCustomerStatus = async (req, res) => {
     if (status === "freeze") {
       customer.status = status;
       customer.freezeDays = freezeDays;
+      customer.freezeDate = new Date(freezeDate);
 
       if (totalAmount) {
         customer.payments.push({
           amount: totalAmount,
           mode,
-          date: new Date(),
-          type: "other",
+          date: new Date(paymentDate),
+          type: "freeze",
           notes: "freeze account",
         });
       }
@@ -340,14 +349,15 @@ exports.updateCustomerStatus = async (req, res) => {
     if (status === "unfreeze") {
       customer.status = "active";
       customer.freezeDays = 0;
+      customer.freezeDate = null;
       customer.membershipEndDate = new Date(expiryDate);
 
       if (totalAmount) {
         customer.payments.push({
           amount: totalAmount,
           mode,
-          date: new Date(),
-          type: "other",
+          date: new Date(paymentDate),
+          type: "freeze",
           notes: notes || "freeze account",
         });
       }
@@ -491,7 +501,7 @@ exports.getUpcomingBirthdays = async (req, res) => {
 // Update Payment
 exports.addPayment = async (req, res) => {
   try {
-    const { totalAmount, mode, notes, type } = req.body;
+    const { totalAmount, mode, notes, type, paymentDate } = req.body;
     const customerId = req.params.id;
 
     const customer = await Customer.findById(customerId);
@@ -499,15 +509,21 @@ exports.addPayment = async (req, res) => {
       return res.status(404).json({ message: "Customer not found" });
     }
 
-    if(type == "debt"){
-      customer.debt -= totalAmount;
+    if(type == "planDebt"){
+      customer.planDebt -= Number(totalAmount);
     }
+
+    if(type == "sessionDebt"){
+      customer.sessionDebt -= Number(totalAmount);
+    }
+
+    customer.amountPaid += Number(totalAmount);
 
     if (totalAmount) {
       customer.payments.push({
         amount: totalAmount,
         mode,
-        date: new Date(),
+        date: new Date(paymentDate),
         type,
         notes,
       });
@@ -538,8 +554,12 @@ exports.getPaymentHistory = async (req, res) => {
     res.status(200).json({
       customerId: customer._id,
       customerName: customer.fullname,
-      totalAmount: totalPaid,
-      debt: customer.debt,
+      totalAmount: customer.totalAmount,
+      amountPaid: customer.amountPaid,
+      planCost: customer.planCost,
+      sessionCost: customer.sessionCost,
+      planDebt: customer.planDebt,
+      sessionDebt: customer.sessionDebt,
       payments: payments,
     });
   } catch (error) {

@@ -3,6 +3,7 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
 import Select from "react-select";
+import config from "../config/config";
 
 const Mapping = () => {
   const [employees, setEmployees] = useState([]);
@@ -12,6 +13,7 @@ const Mapping = () => {
   const [sessionType, setSessionType] = useState("");
   const [sessionCost, setSessionCost] = useState("");
   const [paidCost, setPaidCost] = useState("");
+  const [paymentDate, setPaymentDate] = useState("");
   const [paymentMode, setPaymentMode] = useState(""); // New state for payment mode
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -31,29 +33,30 @@ const Mapping = () => {
   ];
 
   useEffect(() => {
-    axios.get("https://server.fitpreneursapiens.com/api/employee?all=true")
+    axios.get(`${config.apiBaseUrl}/employee?all=true`)
       .then((response) => setEmployees(response.data.employees.reverse()))
       .catch((error) => console.error(error));
 
-    axios.get("https://server.fitpreneursapiens.com/api/customer?all=true")
+    axios.get(`${config.apiBaseUrl}/customer?all=true`)
       .then((response) => setCustomers(response.data.customers))
       .catch((error) => console.error(error));
   }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!selectedCustomer || !selectedEmployee || !sessionType || !sessionCost || !paidCost || !paymentMode) {
+    if (!selectedCustomer || !selectedEmployee || !sessionType || !sessionCost || !paidCost || !paymentMode || !paymentDate) {
       setErrorMessage("Please fill in all fields.");
       return;
     }
 
-    axios.post("https://server.fitpreneursapiens.com/api/employee/assign", {
+    axios.post(`${config.apiBaseUrl}/employee/assign`, {
       customerId: selectedCustomer.value,
       employeeId: selectedEmployee.value,
       sessionType,
       sessionCost: parseFloat(sessionCost),
       paidCost: parseFloat(paidCost),
-      paymentMode // Add payment mode in the payload
+      paymentMode, // Add payment mode in the payload
+      paymentDate
     })
       .then((response) => {
         setSuccessMessage(response.data.message);
@@ -64,6 +67,7 @@ const Mapping = () => {
         setSessionCost("");
         setPaidCost("");
         setPaymentMode(""); // Reset payment mode
+        setPaymentDate("");
       })
       .catch((error) => {
         if (error.response && error.response.data) {
@@ -127,7 +131,7 @@ const Mapping = () => {
           </Form.Group>
 
           {/* Session Cost and Paid Cost */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-4">
             <Form.Group className="mb-3" controlId="formSessionCost">
               <Form.Label className="text-white">Session Cost</Form.Label>
               <Form.Control
@@ -140,12 +144,23 @@ const Mapping = () => {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formPaidCost">
-              <Form.Label className="text-white">Paid Cost</Form.Label>
+              <Form.Label className="text-white">Initial Payment (Debt - {sessionCost - paidCost || 0})</Form.Label>
               <Form.Control
                 type="number"
-                placeholder="Enter paid cost"
+                placeholder="Enter initial payment"
                 value={paidCost}
                 onChange={(e) => setPaidCost(e.target.value)}
+                disabled={!sessionType}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="formPaidCost">
+              <Form.Label className="text-white">Payment Date</Form.Label>
+              <Form.Control
+                type="date"
+                placeholder="Enter payment date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
                 disabled={!sessionType}
               />
             </Form.Group>

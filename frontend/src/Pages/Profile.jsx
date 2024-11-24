@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {jwtDecode} from "jwt-decode"; // Corrected import
 import axios from "axios";
+import config from "../config/config";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -18,7 +19,7 @@ const Profile = () => {
 
   const fetchCustomers = async (employeeId) => {
     try {
-      const response = await axios.get(`https://server.fitpreneursapiens.com/api/employee/${employeeId}/customers`);
+      const response = await axios.get(`${config.apiBaseUrl}/employee/${employeeId}/customers`);
       console.log("Fetched customers:", response.data);
       setCustomers(response.data);
     } catch (error) {

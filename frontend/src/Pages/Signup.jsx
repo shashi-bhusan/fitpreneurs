@@ -3,6 +3,7 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import config from "../config/config";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ const Signup = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("https://server.fitpreneursapiens.com/api/employee", {
+      const response = await axios.post(`${config.apiBaseUrl}/employee`, {
         fullname: formData.name,
         emailId: formData.email,
         mobileNumber: formData.mobileNumber,
