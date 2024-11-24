@@ -145,7 +145,7 @@ exports.getCustomersByEmployee = async (req, res) => {
 //Customer Mapping
 exports.assignCustomerToEmployee = async (req, res) => {
   try {
-    const { customerId, employeeId, sessionType, sessionCost, paidCost } = req.body;
+    const { customerId, employeeId, sessionType, sessionCost, paidCost, paymentMode, paymentDate } = req.body;
 
     // Find the customer
     const customer = await Customer.findById(customerId);
@@ -153,7 +153,7 @@ exports.assignCustomerToEmployee = async (req, res) => {
     if (!customer) {
       return res.status(404).json({ message: "Customer not found" });
     }
-
+    
     // Check if the employee is already assigned to the customer
     if (customer.assignedEmployees.includes(employeeId)) {
       return res.status(400).json({ message: "Employee already assigned to this customer" });
@@ -166,10 +166,17 @@ exports.assignCustomerToEmployee = async (req, res) => {
     customer.sessionType = sessionType;
     customer.sessionCost = sessionCost;
 
-    // Update the totalAmount, amountPaid, and debt
+    // Update the totalAmount, amountPaid, and planDebt
     customer.totalAmount += sessionCost;
     customer.amountPaid += paidCost;
-    customer.debt = customer.totalAmount - customer.amountPaid;
+    customer.sessionDebt +=  sessionCost - paidCost;
+
+    customer.payments.push({
+      amount: paidCost,
+      mode: paymentMode,
+      date: new Date(paymentDate),
+      type: "session",
+    });
 
     // Save the updated customer
     await customer.save();
