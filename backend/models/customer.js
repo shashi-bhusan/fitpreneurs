@@ -79,7 +79,7 @@ const customerSchema = new mongoose.Schema(
       {
         type: {
           type: String,
-          enum: ["session", "plan", "debt", "other"], // Type of payment
+          enum: ["session", "plan", "planDebt", "sessionDebt", "freeze", "other"], // Type of payment
           required: true,
         },
         amount: {
@@ -114,7 +114,11 @@ const customerSchema = new mongoose.Schema(
         },
       },
     ],
-    debt: {
+    planDebt: {
+      type: Number,
+      default: 0,
+    },
+    sessionDebt: {
       type: Number,
       default: 0,
     },

@@ -63,7 +63,7 @@ const ClientDetails = () => {
     tableRows.push(["Session Cost", `${clientData.sessionCost}/-`]);
     tableRows.push(["Total Amount", `${clientData.totalAmount}/-`]);
     tableRows.push(["Amount Paid", `${clientData.amountPaid}/-`]);
-    tableRows.push(["Debt", `${clientData.debt}/-`]);
+    tableRows.push(["Debt", `${clientData.planDebt}/-`]);
     tableRows.push([
       "Membership Start Date",
       formatDate(clientData.membershipStartDate),
@@ -130,11 +130,14 @@ const ClientDetails = () => {
             <strong>Payment Mode:</strong> ₹{clientData.paymentMode}
           </p> */}
           <p>
-            <strong>Debt:</strong> ₹{clientData.debt}
+            <strong>Membership Debt:</strong> ₹{clientData.planDebt}
+          </p>
+          <p>
+            <strong>Session Debt:</strong> ₹{clientData.sessionDebt}
           </p>
           <p>
             <strong>Last Payment Date:</strong>{" "}
-            {formatDate(clientData.payments[0]?.date)}
+            {formatDate(clientData.payments[clientData.payments.length - 1]?.date)}
           </p>
           <p>
             <strong>Membership Start Date:</strong>{" "}

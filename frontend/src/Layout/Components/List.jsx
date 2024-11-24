@@ -55,7 +55,8 @@ const List = ({ searchQuery, filter }) => {
     totalAmount: "",
     mode: "cash",
     notes: "",
-    type: "other",
+    paymentDate: "",
+    type: "planDebt",
   });
 
   const navigate = useNavigate();
@@ -164,7 +165,8 @@ const List = ({ searchQuery, filter }) => {
         totalAmount: "",
         mode: "cash",
         notes: "",
-        type: "other",
+        type: "planDebt",
+        paymentDate: "",
       });
       setIsPaymentModalOpen(false);
       toast.success("Payment added successfully");
@@ -268,6 +270,7 @@ const List = ({ searchQuery, filter }) => {
         startDate: "",
         notes: "",
         planDays: 0,
+        paymentDate: "",
       });
       setSelectedCustomer(customerData);
       setIsPlanRenewOpen(true);
@@ -475,7 +478,7 @@ const List = ({ searchQuery, filter }) => {
                     )}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
-                    {customer.debt}
+                    {customer?.planDebt + customer?.sessionDebt}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap flex gap-1 items-center justify-center">
                     <button
@@ -641,12 +644,15 @@ const List = ({ searchQuery, filter }) => {
                           <strong>Paid Amount:</strong>{" "}
                           {selectedCustomer.amountPaid}
                         </p>
-                        <p>
+                        {/* <p>
                           <strong>Payment Mode:</strong>{" "}
                           {selectedCustomer.paymentMode}
+                        </p> */}
+                        <p>
+                          <strong>Membership Debt:</strong> {selectedCustomer.planDebt}
                         </p>
                         <p>
-                          <strong>Debt:</strong> {selectedCustomer.debt}
+                          <strong>Session Debt:</strong> {selectedCustomer.sessionDebt}
                         </p>
                         <p>
                           <strong>Membership Start:</strong>{" "}
@@ -764,7 +770,7 @@ const List = ({ searchQuery, filter }) => {
                       <div>
                         <p className="text-gray-300">Current Debt</p>
                         <p className="font-medium text-red-400">
-                          ₹{selectedCustomer?.debt || 0}
+                          ₹{selectedCustomer?.planDebt + selectedCustomer?.sessionDebt}
                         </p>
                       </div>
                     </div>
@@ -856,7 +862,7 @@ const List = ({ searchQuery, filter }) => {
                         />
                       </div>
 
-                      <div>
+                      {/* <div>
                         <label className="block text-sm font-medium text-gray-700">
                           Payment mode
                         </label>
@@ -895,7 +901,7 @@ const List = ({ searchQuery, filter }) => {
                           value={planDetails.notes}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black p-2"
                         />
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 
@@ -967,8 +973,14 @@ const List = ({ searchQuery, filter }) => {
                           {paymentHistory.customerName}
                         </p>
                         <p>Total Amount: ₹{paymentHistory.totalAmount}</p>
+                        <p>Membership Amount: ₹{paymentHistory.planCost}</p>
+                        <p>Session Amount: ₹{paymentHistory.sessionCost}</p>
+                        <p className="text-green-400">Amount Paid: ₹{paymentHistory.amountPaid}</p>
                         <p className="text-red-400">
-                          Remaining Balance: ₹{paymentHistory.debt}
+                          Membersip Debt: ₹{paymentHistory.planDebt}
+                        </p>
+                        <p className="text-red-400">
+                          Session Debt: ₹{paymentHistory.sessionDebt}
                         </p>
                       </div>
 
@@ -978,8 +990,9 @@ const List = ({ searchQuery, filter }) => {
                             <tr>
                               <th className="px-4 py-2">Date</th>
                               <th className="px-4 py-2">Amount</th>
-                              <th className="px-4 py-2">Mode</th>
+                              <th className="px-4 py-2">Type</th>
                               <th className="px-4 py-2">Notes</th>
+                              <th className="px-4 py-2">Mode</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -993,9 +1006,12 @@ const List = ({ searchQuery, filter }) => {
                                 </td>
                                 <td className="px-4 py-2">₹{payment.amount}</td>
                                 <td className="px-4 py-2 capitalize">
-                                  {payment.mode}
+                                  {payment.type}
                                 </td>
                                 <td className="px-4 py-2">{payment.notes}</td>
+                                <td className="px-4 py-2 capitalize">
+                                  {payment.mode}
+                                </td>
                               </tr>
                             ))}
                           </tbody>
@@ -1072,6 +1088,23 @@ const List = ({ searchQuery, filter }) => {
 
                         <div>
                           <label className="block text-sm font-medium mb-1">
+                            Payment Date
+                          </label>
+                          <input
+                            type="date"
+                            value={newPayment.paymentDate}
+                            onChange={(e) =>
+                              setNewPayment({
+                                ...newPayment,
+                                paymentDate: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded bg-stone-700 border border-stone-600"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
                             Payment Type
                           </label>
                           <select
@@ -1085,8 +1118,8 @@ const List = ({ searchQuery, filter }) => {
                             className="w-full px-3 py-2 rounded bg-stone-700 border border-stone-600"
                             required
                           >
-                            <option value="other">Other</option>
-                            <option value="debt">Debt</option>
+                            <option value="planDebt">Membership Debt</option>
+                            <option value="sessionDebt">Session Debt</option>
                           </select>
                         </div>
 
@@ -1213,7 +1246,7 @@ const List = ({ searchQuery, filter }) => {
                       <div>
                         <p className="text-gray-300">Current Debt</p>
                         <p className="font-medium text-red-400">
-                          ₹{selectedCustomer?.debt || 0}
+                          ₹{selectedCustomer?.planDebt || 0}
                         </p>
                       </div>
                     </div>
@@ -1307,7 +1340,24 @@ const List = ({ searchQuery, filter }) => {
                         />
                       </div>
 
-                      <div>
+                      {/* <div>
+                        <label className="block text-sm font-medium text-gray-700 ">
+                          Payment Date
+                        </label>
+                        <input
+                          type="date"
+                          required
+                          onChange={(e) =>
+                            setPlanDetails({
+                              ...planDetails,
+                              paymentDate: e.target.value,
+                            })
+                          }
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black p-2"
+                        />
+                      </div> */}
+
+                      {/* <div>
                         <label className="block text-sm font-medium text-gray-700">
                           Payment mode
                         </label>
@@ -1346,7 +1396,7 @@ const List = ({ searchQuery, filter }) => {
                           value={planDetails.notes}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black p-2"
                         />
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 
@@ -1450,14 +1500,14 @@ const List = ({ searchQuery, filter }) => {
                       <div>
                         <p className="text-gray-300">Current Debt</p>
                         <p className="font-medium text-red-400">
-                          ₹{selectedCustomer?.debt || 0}
+                          ₹{selectedCustomer?.planDebt + selectedCustomer?.sessionDebt || 0}
                         </p>
                       </div>
                       {selectedCustomer?.freezeDays > 0 && (
                         <div>
-                          <p className="text-gray-300">Freeze Days</p>
+                          <p className="text-gray-300">Freeze Date - Days</p>
                           <p className="font-medium text-red-400">
-                            {selectedCustomer?.freezeDays || 0}
+                            {moment(selectedCustomer?.freezeDate).format("DD/MM/YY")} - {selectedCustomer?.freezeDays}
                           </p>
                         </div>
                       )}
@@ -1602,7 +1652,7 @@ const List = ({ searchQuery, filter }) => {
                               paymentDate: e.target.value,
                             })
                           }
-                          value={freezeDetails.notes}
+                          value={freezeDetails.paymentDate}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black p-2"
                         />
                       </div>

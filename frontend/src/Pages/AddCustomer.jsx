@@ -25,7 +25,8 @@ const AddCustomer = () => {
     assignedEmployees: [],
     totalAmount: 0,
     payments: [], // New field for payments array
-    debt: 0,
+    planDebt: 0,
+    sessionDebt: 0,
     paymentMode: "cash",
     paymentDate: "",
     initialPayment: "", // New field for first payment
@@ -77,7 +78,8 @@ const AddCustomer = () => {
             assignedEmployees: customer.assignedEmployees,
             totalAmount: customer.totalAmount,
             amountPaid: customer.amountPaid,
-            debt: customer.debt,
+            planDebt: customer.planDebt,
+            sessionDebt: customer.sessionDebt,
             paymentMode: customer.paymentMode,
             paymentDate: customer.paymentDate,
           });
@@ -118,15 +120,15 @@ const AddCustomer = () => {
       calculateTotal({ ...formData, [name]: value });
     }
 
-    if (name === "initialPayment" && value !== "") {
-      const payment = parseFloat(value) || 0;
-      const total = formData.totalAmount;
-      setFormData((prev) => ({
-        ...prev,
-        initialPayment: payment,
-        debt: total - payment,
-      }));
-    }
+    // if (name === "initialPayment" && value !== "") {
+    //   const payment = parseFloat(value) || 0;
+    //   const total = formData.totalAmount;
+    //   setFormData((prev) => ({
+    //     ...prev,
+    //     initialPayment: payment,
+    //     planDebt: total - payment,
+    //   }));
+    // }
   };
 
   const handleCheckboxChange = (event) => {
@@ -154,12 +156,12 @@ const AddCustomer = () => {
       total += parseFloat(sessionCost) || 0;
     }
 
-    const debt = total - (amountPaid ? parseFloat(amountPaid) : 0);
+    // const planDebt = total - (amountPaid ? parseFloat(amountPaid) : 0);
 
     setFormData((prevState) => ({
       ...prevState,
       totalAmount: total,
-      debt: debt,
+      // planDebt: planDebt,
     }));
   };
 
@@ -182,6 +184,7 @@ const AddCustomer = () => {
       membershipStartDate: formData.membershipStartDate,
       totalAmount: Number(formData.totalAmount),
       initialPayment: initialPayment, 
+      planDebt: Number(formData.planDebt),
       paymentMode: formData.paymentMode, 
       paymentDate: formData.paymentDate, 
       assignedEmployees: assignedEmployees,
@@ -191,9 +194,11 @@ const AddCustomer = () => {
     if (showSessionOptions) {
       dataToSend.sessionType = formData.sessionType;
       dataToSend.sessionCost = Number(formData.sessionCost);
+      dataToSend.sessionDebt = Number(formData.sessionDebt);
     } else {
       dataToSend.sessionType = "0 Sessions";
       dataToSend.sessionCost = 0;
+      dataToSend.sessionDebt = 0;
     }
 
     try {
@@ -440,14 +445,24 @@ const AddCustomer = () => {
             </Form.Group>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-3">
             <Form.Group controlId="formBasicDebt" className="w-full">
-              <Form.Label>Debt</Form.Label>
+              <Form.Label>Plan Debt</Form.Label>
               <Form.Control
                 type="number"
-                name="debt"
-                value={formData.totalAmount - formData.initialPayment}
-                readOnly
+                name="planDebt"
+                value={formData.planDebt}
+                onChange={handleChange}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="formBasicDebt" className="w-full">
+              <Form.Label>Session Debt</Form.Label>
+              <Form.Control
+                type="number"
+                name="sessionDebt"
+                value={formData.sessionDebt}
+                onChange={handleChange}
               />
             </Form.Group>
 

@@ -30,15 +30,20 @@ exports.getAllSessionCustomers = async (req, res) => {
     }
 
     // If the "all" flag is true, return all customers without pagination
-    if (all === 'true') {
-      const customers = await Customer.find(query).sort({ createdAt: -1 }); // Sort by newest first
+    if (all === "true") {
+      const customers = await Customer.find(query)
+        .populate({
+          path: "assignedEmployees",
+          select: "fullname emailId",
+        })
+        .sort({ createdAt: -1 }); // Sort by newest first
       return res.status(200).json({
         customers,
         total: customers.length,
         page: 1,
         pages: 1,
       });
-    } 
+    }
 
     // Otherwise, paginate the results
     const pageNum = parseInt(page, 10);
@@ -47,6 +52,10 @@ exports.getAllSessionCustomers = async (req, res) => {
 
     const [customers, totalCustomers] = await Promise.all([
       Customer.find(query)
+        .populate({
+          path: "assignedEmployees",
+          select: "fullname",
+        })
         .sort({ createdAt: -1 }) // Sort by newest first
         .skip(skip)
         .limit(limitNum),
