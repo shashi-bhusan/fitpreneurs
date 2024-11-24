@@ -100,18 +100,21 @@ const List = ({ searchQuery, filter }) => {
               <th className="px-3 py-2 text-left text-base font-medium uppercase tracking-wider">
                 Mobile No.
               </th>
-              <th className="px-3 py-2 text-left text-base font-medium uppercase tracking-wider">
+              {/* <th className="px-3 py-2 text-left text-base font-medium uppercase tracking-wider">
                 Plan
-              </th>
+              </th> */}
               <th className="px-3 py-2 text-left text-base font-medium uppercase tracking-wider">
                 Sessions
               </th>
               <th className="px-3 py-2 text-left text-base font-medium uppercase tracking-wider">
+                Trainer
+              </th>
+              {/* <th className="px-3 py-2 text-left text-base font-medium uppercase tracking-wider">
                 Address
               </th>
               <th className="px-3 py-2 text-center text-base font-medium uppercase tracking-wider">
                 Actions
-              </th>
+              </th> */}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 text-base font-normal bg-stone-700 bg-opacity-70 text-white">
@@ -127,13 +130,16 @@ const List = ({ searchQuery, filter }) => {
                   <td className="px-3 py-2 whitespace-nowrap">
                     {customer.mobileNumber}
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  {/* <td className="px-3 py-2 whitespace-nowrap">
                     {customer.plan}
-                  </td>
+                  </td> */}
                   <td className="px-3 py-2 whitespace-nowrap">
                     {customer.sessionType}
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap capitalize">
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    {customer.assignedEmployees[0]?.fullname || "N/A"}
+                  </td>
+                  {/* <td className="px-3 py-2 whitespace-nowrap capitalize">
                     {customer.address}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap flex items-center justify-center">
@@ -144,7 +150,7 @@ const List = ({ searchQuery, filter }) => {
                     >
                       Remove Sessions
                     </button>
-                  </td>
+                  </td> */}
                 </tr>
               ))
             ) : (
@@ -268,7 +274,7 @@ const List = ({ searchQuery, filter }) => {
                           <strong>Payment Mode:</strong> {selectedCustomer.paymentMode}
                         </p>
                         <p>
-                          <strong>Debt:</strong> {selectedCustomer.debt}
+                          <strong>Debt:</strong> {selectedCustomer.planDebt}
                         </p>
                         <p>
                           <strong>Membership Start:</strong> {new Date(selectedCustomer.membershipStartDate).toLocaleDateString("en-GB")}
