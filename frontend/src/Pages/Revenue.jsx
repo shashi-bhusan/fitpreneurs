@@ -49,7 +49,6 @@ const RevenuePage = () => {
           year: currentYear,
         },
       });
-      console.log("API Response:", response.data);
 
       setRevenueData(response.data || []);
       setTotalRevenue(response.data.totalRevenue || 0);
@@ -121,6 +120,28 @@ const RevenuePage = () => {
     }
   };
 
+  const handleMonthlyExport = async () => {
+    try {
+      const year = startDate.getFullYear();
+      const month = startDate.getMonth() + 1;
+
+      let response = await axios({
+        method: "GET",
+        url: `${config.apiBaseUrl}/revenue/revenue-export`,
+        params: {
+          month,
+          year
+        },
+        responseType: "blob"
+      });
+
+      fileDownload(response.data, `monthly_revenue_${month}_${year}.xlsx`);
+    } catch (err) {
+      alert("Error exporting monthly revenue or no data found for this month.");
+      console.error("Error exporting customers:", err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       {/* Header Section */}
@@ -133,6 +154,13 @@ const RevenuePage = () => {
         </div>
 
         <div className="flex items-center space-x-4">
+        <button
+            className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600"
+            onClick={() => handleMonthlyExport()}
+          >
+            <FaDownload className="w-5 h-5" />
+            <span>Export</span>
+          </button>
           <DatePicker
             selected={startDate}
             onChange={(date) => setStartDate(date)}
@@ -152,7 +180,7 @@ const RevenuePage = () => {
             ₹{totalRevenue.toLocaleString()}
           </p>
         </div>
-        <div>
+        {/* <div>
           <button
             className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600"
             onClick={handleAllCashExport}
@@ -160,7 +188,7 @@ const RevenuePage = () => {
             <FaDownload className="w-5 h-5" />
             <span>Export</span>
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Cash Revenue Section */}
@@ -171,7 +199,7 @@ const RevenuePage = () => {
             ₹{cashRevenue.toLocaleString()}
           </p>
         </div>
-        <div>
+        {/* <div>
           <button
             className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600"
             onClick={handleCashExport}
@@ -179,7 +207,7 @@ const RevenuePage = () => {
             <FaDownload className="w-5 h-5" />
             <span>Export</span>
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Online Revenue Section */}
@@ -190,7 +218,7 @@ const RevenuePage = () => {
             ₹{onlineRevenue.toLocaleString()}
           </p>
         </div>
-        <div>
+        {/* <div>
           <button
             className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600"
             onClick={handleOnlineExport}
@@ -198,7 +226,7 @@ const RevenuePage = () => {
             <FaDownload className="w-5 h-5" />
             <span>Export</span>
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Membership Revenue Section */}
@@ -209,7 +237,7 @@ const RevenuePage = () => {
             ₹{membershipRevenue.toLocaleString()}
           </p>
         </div>
-        <div>
+        {/* <div>
           <button
             className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600"
             onClick={handleAllCashExport}
@@ -217,7 +245,7 @@ const RevenuePage = () => {
             <FaDownload className="w-5 h-5" />
             <span>Export</span>
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Session Revenue Section */}
@@ -228,7 +256,7 @@ const RevenuePage = () => {
             ₹{sessionRevenue.toLocaleString()}
           </p>
         </div>
-        <div>
+        {/* <div>
           <button
             className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600"
             onClick={handlePtExport}
@@ -236,7 +264,7 @@ const RevenuePage = () => {
             <FaDownload className="w-5 h-5" />
             <span>Export</span>
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
