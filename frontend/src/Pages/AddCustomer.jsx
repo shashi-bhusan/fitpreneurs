@@ -439,7 +439,7 @@ const AddCustomer = () => {
                 onChange={handleChange}
               >
                 <option value="cash">Cash</option>
-                <option value="online">Online</option>
+                <option value="card">Card</option>
                 <option value="upi">UPI</option>
               </Form.Control>
             </Form.Group>
