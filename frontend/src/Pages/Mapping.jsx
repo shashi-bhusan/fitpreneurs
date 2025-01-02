@@ -27,7 +27,7 @@ const Mapping = () => {
 
   const paymentModes = [
     { value: "cash", label: "Cash" },
-    { value: "online", label: "Online" },
+    { value: "card", label: "Card" },
     { value: "upi", label: "UPI" }
 
   ];
