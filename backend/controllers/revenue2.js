@@ -10,11 +10,11 @@ exports.getMonthlyRevenueByPaymentMode = async (req, res) => {
     const startOfMonth = moment().startOf('month').toDate();
     const endOfMonth = moment().endOf('month').toDate();
 
-    // Aggregate for cash and online payments
+    // Aggregate for cash and card payments
     const revenueData = await Customer.aggregate([
       {
         $match: {
-          paymentMode: { $in: ["cash", "online"] },
+          paymentMode: { $in: ["cash", "card"] },
           updatedAt: { $gte: startOfMonth, $lte: endOfMonth },
         },
       },
@@ -27,11 +27,11 @@ exports.getMonthlyRevenueByPaymentMode = async (req, res) => {
     ]);
 
     const cashRevenue = revenueData.find((data) => data._id === "cash")?.totalCollected || 0;
-    const onlineRevenue = revenueData.find((data) => data._id === "online")?.totalCollected || 0;
+    const cardRevenue = revenueData.find((data) => data._id === "card")?.totalCollected || 0;
 
     res.status(200).json({
       cashRevenue,
-      onlineRevenue,
+      cardRevenue,
     });
   } catch (error) {
     console.error("Error fetching revenue data:", error);
@@ -61,10 +61,10 @@ exports.getMonthlyRevenue = async (req, res) => {
           cashRevenue: {
             $sum: { $cond: [{ $eq: ["$payments.mode", "cash"] }, "$payments.amount", 0] }
           },
-          onlineUpiRevenue: {
+          cardUpiRevenue: {
             $sum: {
               $cond: [
-                { $or: [{ $eq: ["$payments.mode", "online"] }, { $eq: ["$payments.mode", "upi"] }] },
+                { $or: [{ $eq: ["$payments.mode", "card"] }, { $eq: ["$payments.mode", "upi"] }] },
                 "$payments.amount",
                 0,
               ],
@@ -95,7 +95,7 @@ exports.getMonthlyRevenue = async (req, res) => {
           _id: 0, // Remove _id from the output
           totalRevenue: 1,
           cashRevenue: 1,
-          onlineUpiRevenue: 1,
+          cardUpiRevenue: 1,
           membershipRevenue: 1,
           sessionsRevenue: 1,
         },
