@@ -15,18 +15,18 @@ const RevenuePage = () => {
   const [cashRevenue, setCashRevenue] = useState(0); // New state for cash revenue
   const [onlineRevenue, setOnlineRevenue] = useState(0); // New state for online revenue
 
-  const fetchCashOnline = async () => {
-    try {
-      const response = await axios.get(
-        `${config.apiBaseUrl}/revenue/monthly-revenue`
-      );
-      console.log("Cash and Online API Response:", response.data);
-      setCashRevenue(response.data.cashRevenue || 0);
-      setOnlineRevenue(response.data.onlineRevenue || 0);
-    } catch (error) {
-      console.error("Error fetching cash and online revenue data:", error);
-    }
-  };
+  // const fetchCashOnline = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${config.apiBaseUrl}/revenue/monthly-revenue`
+  //     );
+  //     console.log("Cash and Online API Response:", response.data);
+  //     setCashRevenue(response.data.cashRevenue || 0);
+  //     setOnlineRevenue(response.data.onlineRevenue || 0);
+  //   } catch (error) {
+  //     console.error("Error fetching cash and online revenue data:", error);
+  //   }
+  // };
 
   const fetchRevenueData = async (selectedDate) => {
     try {
@@ -55,7 +55,7 @@ const RevenuePage = () => {
       setCashRevenue(response.data.cashRevenue || 0);
       setMembershipRevenue(response.data.membershipRevenue || 0);
       setSessionRevenue(response.data.sessionsRevenue || 0);
-      setOnlineRevenue(response.data.onlineUpiRevenue || 0);
+      setOnlineRevenue(response.data.cardUpiRevenue || 0);
     } catch (error) {
       console.error("Error fetching revenue data:", error);
     }
@@ -66,59 +66,59 @@ const RevenuePage = () => {
     // fetchCashOnline();
   }, [startDate]);
 
-  const handleAllCashExport = async () => {
-    try {
-      const response = await axios.get(
-        `${config.apiBaseUrl}/export/exportcustomers`,
-        {
-          responseType: "blob",
-        }
-      );
-      fileDownload(response.data, "customers.xlsx");
-    } catch (err) {
-      console.error("Error exporting customers:", err);
-    }
-  };
+  // const handleAllCashExport = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${config.apiBaseUrl}/export/exportcustomers`,
+  //       {
+  //         responseType: "blob",
+  //       }
+  //     );
+  //     fileDownload(response.data, "customers.xlsx");
+  //   } catch (err) {
+  //     console.error("Error exporting customers:", err);
+  //   }
+  // };
 
-  const handlePtExport = async () => {
-    try {
-      const response = await axios.get(
-        `${config.apiBaseUrl}/export/exportcustomerwithpt`,
-        {
-          responseType: "blob",
-        }
-      );
-      fileDownload(response.data, "customers_with_pt-Sessions.xlsx");
-    } catch (err) {
-      console.error("Error exporting customers with Sessions:", err);
-    }
-  };
-  const handleCashExport = async () => {
-    try {
-      const response = await axios.get(
-        `${config.apiBaseUrl}/export/customerpaidcash`,
-        {
-          responseType: "blob",
-        }
-      );
-      fileDownload(response.data, "customers_paid_with_cash.xlsx");
-    } catch (err) {
-      console.error("Error exporting customers with Cash payment:", err);
-    }
-  };
-  const handleOnlineExport = async () => {
-    try {
-      const response = await axios.get(
-        `${config.apiBaseUrl}/export/customerpaidonline`,
-        {
-          responseType: "blob",
-        }
-      );
-      fileDownload(response.data, "customers_paid_online.xlsx");
-    } catch (err) {
-      console.error("Error exporting customers with Online payment:", err);
-    }
-  };
+  // const handlePtExport = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${config.apiBaseUrl}/export/exportcustomerwithpt`,
+  //       {
+  //         responseType: "blob",
+  //       }
+  //     );
+  //     fileDownload(response.data, "customers_with_pt-Sessions.xlsx");
+  //   } catch (err) {
+  //     console.error("Error exporting customers with Sessions:", err);
+  //   }
+  // };
+  // const handleCashExport = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${config.apiBaseUrl}/export/customerpaidcash`,
+  //       {
+  //         responseType: "blob",
+  //       }
+  //     );
+  //     fileDownload(response.data, "customers_paid_with_cash.xlsx");
+  //   } catch (err) {
+  //     console.error("Error exporting customers with Cash payment:", err);
+  //   }
+  // };
+  // const handleOnlineExport = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${config.apiBaseUrl}/export/customerpaidonline`,
+  //       {
+  //         responseType: "blob",
+  //       }
+  //     );
+  //     fileDownload(response.data, "customers_paid_online.xlsx");
+  //   } catch (err) {
+  //     console.error("Error exporting customers with Online payment:", err);
+  //   }
+  // };
 
   const handleMonthlyExport = async () => {
     try {

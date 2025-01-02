@@ -61,7 +61,7 @@ const List = ({ searchQuery, filter }) => {
 
   const navigate = useNavigate();
 
-  const limit = 7;
+  const limit = 10;
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -1081,7 +1081,7 @@ const List = ({ searchQuery, filter }) => {
                             required
                           >
                             <option value="cash">Cash</option>
-                            <option value="online">Online</option>
+                            <option value="card">Card</option>
                             <option value="upi">UPI</option>
                           </select>
                         </div>
@@ -1635,7 +1635,8 @@ const List = ({ searchQuery, filter }) => {
                             Select a mode
                           </option>
                           <option value="cash">cash</option>
-                          <option value="online">online</option>
+                          <option value="card">card</option>
+                          <option value="upi">upi</option>
                         </select>
                       </div>
 
