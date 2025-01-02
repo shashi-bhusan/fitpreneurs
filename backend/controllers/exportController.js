@@ -127,20 +127,20 @@ exports.handleCashPaymentCustomerExport = async (req, res) => {
   }
 };
 
-// Export customers who paid with online payments
-exports.handleOnlinePaymentCustomerExport = async (req, res) => {
+// Export customers who paid with card payments
+exports.handleCardPaymentCustomerExport = async (req, res) => {
   try {
-    const query = { paymentMode: "online" };
+    const query = { paymentMode: "card" };
     const customers = await Customer.find(query);
 
     // Convert to JSON then to worksheet
     const customerData = customers.map((customer) => customer.toObject());
     const worksheet = XLSX.utils.json_to_sheet(customerData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Online Customers");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Card Customers");
 
     // Save the workbook to a file
-    const filePath = path.join(__dirname, "online_customers.xlsx");
+    const filePath = path.join(__dirname, "card_customers.xlsx");
     XLSX.writeFile(workbook, filePath);
 
     // Send the file

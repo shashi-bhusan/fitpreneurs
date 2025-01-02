@@ -72,7 +72,7 @@ const customerSchema = new mongoose.Schema(
     paymentMode: {
       type: String,
       default: "cash",
-      enum: ["cash", "online", "upi"],
+      enum: ["cash", "card", "upi"],
     },
     payments: [
       {
@@ -92,7 +92,7 @@ const customerSchema = new mongoose.Schema(
         },
         mode: {
           type: String,
-          enum: ["cash", "online", "upi"],
+          enum: ["cash", "card", "upi"],
           required: true,
         },
         notes: {
