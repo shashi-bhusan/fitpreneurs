@@ -14,6 +14,8 @@ const RevenuePage = () => {
   const [sessionRevenue, setSessionRevenue] = useState(0);
   const [cashRevenue, setCashRevenue] = useState(0); // New state for cash revenue
   const [onlineRevenue, setOnlineRevenue] = useState(0); // New state for online revenue
+  const [cardRevenue, setCardRevenue] = useState(0);
+  const [upiRevenue, setUpiRevenue] = useState(0);
 
   // const fetchCashOnline = async () => {
   //   try {
@@ -51,11 +53,13 @@ const RevenuePage = () => {
       });
 
       setRevenueData(response.data || []);
-      setTotalRevenue(response.data.totalRevenue || 0);
-      setCashRevenue(response.data.cashRevenue || 0);
-      setMembershipRevenue(response.data.membershipRevenue || 0);
-      setSessionRevenue(response.data.sessionsRevenue || 0);
-      setOnlineRevenue(response.data.cardUpiRevenue || 0);
+      setTotalRevenue(response.data?.totalRevenue || 0);
+      setCashRevenue(response.data?.cashRevenue || 0);
+      setMembershipRevenue(response.data?.membershipRevenue || 0);
+      setSessionRevenue(response.data?.sessionsRevenue || 0);
+      setOnlineRevenue(response.data?.cardUpiRevenue || 0);
+      setCardRevenue(response.data?.cardRevenue || 0);
+      setUpiRevenue(response.data?.upiRevenue || 0);
     } catch (error) {
       console.error("Error fetching revenue data:", error);
     }
@@ -210,12 +214,31 @@ const RevenuePage = () => {
         </div> */}
       </div>
 
-      {/* Online Revenue Section */}
+      {/* Card Revenue Section */}
       <div className="bg-stone-700 bg-opacity-80 text-white shadow-lg rounded-lg p-6 mb-6 flex justify-between items-center">
         <div className="left">
-          <h2 className="text-2xl font-bold">Online Revenue</h2>
+          <h2 className="text-2xl font-bold">Card Revenue</h2>
           <p className="text-4xl text-blue-500 mt-2">
-            ₹{onlineRevenue.toLocaleString()}
+            ₹{cardRevenue.toLocaleString()}
+          </p>
+        </div>
+        {/* <div>
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600"
+            onClick={handleOnlineExport}
+          >
+            <FaDownload className="w-5 h-5" />
+            <span>Export</span>
+          </button>
+        </div> */}
+      </div>
+
+      {/* UPI Revenue Section */}
+      <div className="bg-stone-700 bg-opacity-80 text-white shadow-lg rounded-lg p-6 mb-6 flex justify-between items-center">
+        <div className="left">
+          <h2 className="text-2xl font-bold">UPI Revenue</h2>
+          <p className="text-4xl text-blue-500 mt-2">
+            ₹{upiRevenue.toLocaleString()}
           </p>
         </div>
         {/* <div>

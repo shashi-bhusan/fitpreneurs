@@ -61,6 +61,12 @@ exports.getMonthlyRevenue = async (req, res) => {
           cashRevenue: {
             $sum: { $cond: [{ $eq: ["$payments.mode", "cash"] }, "$payments.amount", 0] }
           },
+          cardRevenue: {
+            $sum: { $cond: [{ $eq: ["$payments.mode", "card"] }, "$payments.amount", 0] }
+          },
+          upiRevenue: {
+            $sum: { $cond: [{ $eq: ["$payments.mode", "upi"] }, "$payments.amount", 0] }
+          },
           cardUpiRevenue: {
             $sum: {
               $cond: [
@@ -95,6 +101,8 @@ exports.getMonthlyRevenue = async (req, res) => {
           _id: 0, // Remove _id from the output
           totalRevenue: 1,
           cashRevenue: 1,
+          cardRevenue: 1,
+          upiRevenue: 1,
           cardUpiRevenue: 1,
           membershipRevenue: 1,
           sessionsRevenue: 1,
